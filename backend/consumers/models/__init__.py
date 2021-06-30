@@ -1,0 +1,1 @@
+from consumers.models.chat_room import ChatRoom
