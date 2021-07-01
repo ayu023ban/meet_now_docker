@@ -165,9 +165,12 @@ const Room = () => {
 
   const socketConnect = async () => {
     socketRef.current.refresh();
+    let protocol = window.location.protocol === "http:" ? "ws" : "wss";
+    let host = window.location.hostname.includes("localhost")
+      ? "localhost:7000"
+      : window.location.hostname;
     socketRef.current.connect(
-      `wss://${window.location.hostname}/ws/room/${roomID}/`,
-      // `ws://localhost:7000/ws/room/${roomID}/`,
+      `${protocol}://${host}/ws/room/${roomID}/`,
       (e) => {
         console.log(e);
         history.replace("/", {
@@ -191,7 +194,6 @@ const Room = () => {
   }, []);
 
   useEffect(() => {
-    let userStreamRef = userStream;
     socketFunctions(
       peersRef,
       myID,
@@ -200,6 +202,10 @@ const Room = () => {
       isUserAudioOn,
       isUserVideoOn
     );
+  }, [userStream, isUserAudioOn, isUserVideoOn, myID]);
+
+  useEffect(() => {
+    let userStreamRef = userStream;
     return () => {
       if (userStreamRef) {
         userStreamRef.getVideoTracks().forEach((track) => {
@@ -210,7 +216,7 @@ const Room = () => {
         });
       }
     };
-  }, [userStream, isUserAudioOn, isUserVideoOn, myID]);
+  }, [userStream]);
 
   useEffect(() => {
     if (userStream) {
@@ -268,7 +274,6 @@ const Room = () => {
               key={index}
               peer={item.peer}
               user={item.user}
-              muted
               size={sizeMap[index + 2]}
               rows={sizeMap["rows"]}
             />
