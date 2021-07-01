@@ -166,7 +166,7 @@ const Room = () => {
   const socketConnect = async () => {
     socketRef.current.refresh();
     socketRef.current.connect(
-      `ws://${window.location.hostname}/ws/room/${roomID}/`,
+      `wss://${window.location.hostname}/ws/room/${roomID}/`,
       // `ws://localhost:7000/ws/room/${roomID}/`,
       (e) => {
         console.log(e);
