@@ -13,7 +13,8 @@ class ChatRoom(models.Model):
         related_name='rooms'
     )
     created_at = models.DateTimeField(auto_now_add=True)
-
+    blocked_users = models.ManyToManyField(User,related_name="blocked_rooms")
+    invited_users = models.ManyToManyField(User,related_name="invited_rooms")
     def __str__(self):
         room_name = self.room_name
         return f"{room_name}"

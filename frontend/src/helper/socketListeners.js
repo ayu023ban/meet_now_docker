@@ -1,6 +1,7 @@
 import { toast } from "react-toastify";
 import WebsocketService from "../components/WebsocketService";
 import { getFullName } from "../helper/utilFunctions";
+import { getUniqueArray } from "./helperFunctions";
 import { addPeer, createPeer } from "./peers";
 
 export const all_users_listener =
@@ -97,4 +98,19 @@ export const audioMediaListener = (peersRef, setPeers) => (payload) => {
   }
 };
 
+export const getPermissionListener = (myID, setAcceptStatus) => (payload) => {
+  if (payload.usable_id === myID) {
+    setAcceptStatus(payload.status);
+  }
+};
 
+export const getPermissionRequestListener =
+  (myID, setWaitingUsers) => (payload) => {
+    if (payload.usable_id === myID) {
+      setWaitingUsers((users) => {
+        users.push(payload.user);
+        const newUsers = getUniqueArray(users, "id");
+        return newUsers;
+      });
+    }
+  };

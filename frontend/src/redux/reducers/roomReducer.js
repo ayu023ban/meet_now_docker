@@ -1,6 +1,8 @@
 import {
   CREATE_ROOM,
+  GET_ROOM,
   GET_ROOMS,
+  SET_USER_IS_CREATOR,
   TOGGLE_USER_AUDIO,
   TOGGLE_USER_VIDEO,
 } from "../actions/roomActionTypes";
@@ -18,6 +20,7 @@ const initialState = {
     audioOn: true,
     videoOn: true,
   },
+  isUserCreator: false,
 };
 
 export default function roomReducer(
@@ -43,6 +46,10 @@ export default function roomReducer(
         ...state,
         userVideo: { ...state.userVideo, videoOn: !state.userVideo.videoOn },
       };
+    case GET_ROOM:
+      return { ...state, currentRoom: payload };
+    case SET_USER_IS_CREATOR:
+      return { ...state, isUserCreator: payload };
     default:
       return state;
   }

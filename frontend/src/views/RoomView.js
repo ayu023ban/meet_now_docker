@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import WebsocketService from "../components/WebsocketService";
-import { useHistory, useParams } from "react-router";
+import { useParams } from "react-router";
 import Video from "../components/common/Video";
 import Controls from "../components/Room/Controls";
 import { split } from "../helper/utilFunctions";
@@ -14,7 +14,11 @@ import {
   receive_returned_signal,
   videoMediaListener,
   audioMediaListener,
+  getPermissionRequestListener,
 } from "../helper/socketListeners";
+import JoinModal from "../components/Room/JoinModal";
+import { switchCamera } from "../helper/unusedFunctions";
+import { getIsUserCreator, getRoom } from "../redux/actions/roomActions";
 
 let videoConstraints = {
   height: window.innerHeight / 2,
@@ -37,7 +41,8 @@ const socketFunctions = (
   stream,
   setPeers,
   isUserAudioOn,
-  isUserVideoOn
+  isUserVideoOn,
+  setWaitingUsers
 ) => {
   WebsocketService.on(
     "all users",
@@ -65,6 +70,10 @@ const socketFunctions = (
   WebsocketService.on("videoMedia", videoMediaListener(peersRef, setPeers));
 
   WebsocketService.on("audioMedia", audioMediaListener(peersRef, setPeers));
+  WebsocketService.on(
+    "user want to join",
+    getPermissionRequestListener(myID, setWaitingUsers)
+  );
 };
 
 const Room = () => {
@@ -84,9 +93,10 @@ const Room = () => {
   const isUserVideoOn = useSelector(
     (state) => state.roomReducer.userVideo.videoOn
   );
-  const history = useHistory();
   const classes = useStyles();
   const me = useSelector((state) => state.userReducer.user);
+  const [waitingUsers, setWaitingUsers] = useState([]);
+  const dispatch = useDispatch();
 
   const setCameraStream = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({
@@ -99,98 +109,15 @@ const Room = () => {
     }
   };
 
-  const updateStream = (stream) => {
-    for (let key in peersRef.current) {
-      // peersRef.current[key].removeTrack(
-      //   // userStream.getVideoTracks()[0],
-      //   peersRef.current[key].streams[0].getVideoTracks()[0],
-      //   userStream
-      // );
-      // peersRef.current[key].addTrack(stream.getVideoTracks()[0], userStream);
-      // peersRef.current[key]._pc.getSenders().forEach((sender) => {
-      //   if (sender.track.type === "video") {
-      //     sender.replaceTrack(userStream.getVideoTracks()[0]);
-      //   }
-      // });
-      peersRef.current[key].peer.streams.forEach((stream) => {
-        stream.getTracks().forEach((track) => {
-          track.stop();
-        });
-      });
-    }
-    setPeers({ ...peersRef.current });
-    userStream.removeTrack(userStream.getVideoTracks()[0]);
-    userStream.addTrack(stream.getVideoTracks()[0]);
-  };
-
-  const switchCamera = async (currentCameraRef) => {
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    const videoDevices = devices.filter(
-      (device) => device.kind === "videoinput"
-    );
-    currentCameraRef.current =
-      (currentCameraRef.current + 1) % videoDevices.length;
-
-    const updatedConstraints = {
-      ...videoConstraints,
-      deviceId: {
-        exact: videoDevices[currentCameraRef.current].deviceId,
-      },
-    };
-    videoConstraints = updatedConstraints;
-
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: videoConstraints,
-      audio: true,
-    });
-    updateStream(stream);
-  };
-
-  function shareScreen() {
-    navigator.mediaDevices
-      .getDisplayMedia({ cursor: true })
-      .then((screenStream) => {
-        // const temp = {};
-        Object.keys(peersRef.current).forEach((key) => {
-          // let peer = peersRef.current[key];
-          peersRef.current[key].replaceTrack(
-            userStream.getVideoTracks()[0],
-            screenStream.getVideoTracks()[0],
-            userStream
-          );
-          // temp[key] = peer;
-        });
-      });
-  }
-
   const socketConnect = async () => {
-    socketRef.current.refresh();
-    let protocol = window.location.protocol === "http:" ? "ws" : "wss";
-    let host = window.location.hostname.includes("localhost")
-      ? "localhost:7000"
-      : window.location.hostname;
-    socketRef.current.connect(
-      `${protocol}://${host}/ws/room/${roomID}/`,
-      (e) => {
-        console.log(e);
-        history.replace("/", {
-          message: "the url entered is incorrect.",
-          type: "error",
-        });
-      }
-    );
     await setCameraStream();
     socketRef.current.sendMessage("join room", roomID);
   };
 
   useEffect(() => {
-    let websocketRef = socketRef.current;
+    dispatch(getIsUserCreator(roomID));
+    dispatch(getRoom(roomID));
     socketConnect();
-    return () => {
-      if (websocketRef) {
-        websocketRef.close();
-      }
-    };
   }, []);
 
   useEffect(() => {
@@ -200,7 +127,8 @@ const Room = () => {
       userStream,
       setPeers,
       isUserAudioOn,
-      isUserVideoOn
+      isUserVideoOn,
+      setWaitingUsers
     );
   }, [userStream, isUserAudioOn, isUserVideoOn, myID]);
 
@@ -280,9 +208,13 @@ const Room = () => {
           );
         })}
       </div>
+      <JoinModal
+        waitingUsers={waitingUsers}
+        setWaitingUsers={setWaitingUsers}
+      />
       <Controls
         switchc={() => {
-          switchCamera(currentCameraRef);
+          switchCamera(videoConstraints)(currentCameraRef);
         }}
         toggleChat={() => {
           setChatOpen((open) => !open);

@@ -27,6 +27,7 @@ class SocketConsumer(WebsocketConsumer):
         "send new message":self.new_message,
         "audioMedia":self.handle_audio_media,
         "videoMedia":self.handle_video_media,
+        "give join permission status":self.handle_join_permission_status
         }
 
     def connect(self):
@@ -42,8 +43,21 @@ class SocketConsumer(WebsocketConsumer):
                 self.channel_name
             )
             user = self.scope['user']
-            room.users.add(user)
             self.accept()
+            serialized_data = UserSerializer(user).data
+            final_data = getSerializedData(serialized_data)
+            creator = room.creator
+
+            if user == creator:
+                room.users.add(user)
+                self.send_message("get permission",{"usable_id":user.id, "status":"accept"})
+            else:
+                query = room.users.all().filter(id=creator.id)
+                if not query:
+                    self.send_message("join message","creator not available")
+                else:
+                    self.broadcast("user want to join",{"user":final_data,"usable_id":creator.id})
+
         except Exception:
             self.accept()
             self.close(code=4000)
@@ -96,6 +110,15 @@ class SocketConsumer(WebsocketConsumer):
 
     def handle_video_media(self,data):
         self.broadcast("videoMedia",data)
+    
+    def handle_join_permission_status(self,data):
+        creator = self.scope["user"]
+        room =  self.room
+        if creator == room.creator:
+            if(data["status"]=="accept"):
+                user = User.objects.get(pk=data["userID"])    
+                room.users.add(user)
+            self.broadcast("get permission",{"usable_id":data["userID"], "status":data["status"]})
 
     def receive(self, text_data):
         data = json.loads(text_data)
@@ -103,8 +126,9 @@ class SocketConsumer(WebsocketConsumer):
         if fun is not None:
             fun(data['data'])
 
-    def send_message(self, content):
-        self.send(text_data=json.dumps(content))
+    def send_message(self,command, content):
+        s = json.dumps({"command":command,"data":content})
+        self.send(text_data=s)
 
     def broadcast(self,type, data):
         async_to_sync(self.channel_layer.group_send)(

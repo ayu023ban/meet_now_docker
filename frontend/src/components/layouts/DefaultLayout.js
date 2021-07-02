@@ -23,9 +23,7 @@ const DefaultLayout = ({ children }) => {
         <ToastContainer
           newestOnTop={false}
           closeOnClick
-          pauseOnFocusLoss
           draggable
-          pauseOnHover
           limit={3}
           position="bottom-left"
           autoClose={2000}

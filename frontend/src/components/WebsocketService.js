@@ -33,6 +33,7 @@ class WebSocketService {
     };
 
     this.socketRef.onclose = (e) => {
+      console.log(e);
       if (e.code === 4000) {
         this.fallback(e);
       } else if (this.forcedClose) {
@@ -66,6 +67,7 @@ class WebSocketService {
     if (Object.keys(this.callbacks).length === 0) {
       return;
     }
+    console.log(parsedData);
     if (this.callbacks[command]) {
       this.callbacks[command](data);
     }
@@ -75,6 +77,7 @@ class WebSocketService {
     try {
       this.waitForConnection(
         function () {
+          console.log(JSON.stringify({ type, data }));
           this.socketRef.send(JSON.stringify({ type, data }));
         }.bind(this),
         1000

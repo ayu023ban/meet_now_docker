@@ -8,3 +8,4 @@ export const logout = "user/rest-auth/logout/";
 export const create_room = "room/";
 export const get_room = "room/";
 export const invite = (id) => `room/${id}/invite/`;
+export const isUserCreator = (id) =>`room/${id}/isUserCreator/`
