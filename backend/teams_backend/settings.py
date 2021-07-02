@@ -176,3 +176,6 @@ CSRF_COOKIE_NAME = 'teams_csrftoken'
 
 AUTH_USER_MODEL = 'users.User'
 
+# Security options for the yourmeet
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
