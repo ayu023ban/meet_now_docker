@@ -6,6 +6,20 @@ export function createPeer(userToSignal, callerID, stream) {
     initiator: true,
     trickle: false,
     stream,
+    config: {
+      iceServers: [
+        {
+          urls: "stun:numb.viagenie.ca",
+          username: "ayu023ban@gmail.com",
+          credential: "Manju2000@",
+        },
+        {
+          urls: "turn:numb.viagenie.ca",
+          username: "ayu023ban@gmail.com",
+          credential: "Manju2000@",
+        },
+      ],
+    },
   });
   peer.on("signal", (signal) => {
     WebsocketService.sendMessage("sending signal", {

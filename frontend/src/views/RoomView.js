@@ -103,7 +103,7 @@ const Room = () => {
 
   const setCameraStream = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({
-      video: videoConstraints,
+      video: true,
       audio: true,
     });
     setUserStream(stream);
