@@ -2,9 +2,7 @@ import { Paper, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { apiDispatch } from "../../helper/helperFunctions";
-import { deleteRoom } from "../../redux/actions/roomActions";
-import { GET_ROOMS } from "../../redux/actions/roomActionTypes";
+import { removeInviteUser } from "../../redux/actions/roomActions";
 import RoomCard from "./RoomCard";
 import { useMediaQuery } from "@material-ui/core";
 import { useTheme } from "@material-ui/styles";
@@ -34,10 +32,11 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const RoomList = () => {
-  const rooms = useSelector((state) => state.roomReducer.rooms);
+const Invitations = () => {
+  const rooms = useSelector((state) => state.userReducer.invitedRooms);
   const classes = useStyles();
   const dispatch = useDispatch();
+  const myEmail = useSelector((state) => state.userReducer.user.email);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   return (
@@ -47,7 +46,7 @@ const RoomList = () => {
         align="center"
         className={classes.header}
       >
-        Your Rooms
+        Your Invitations
       </Typography>
       {rooms.length > 0 &&
         rooms.map((el, idx) => (
@@ -55,22 +54,17 @@ const RoomList = () => {
             key={idx}
             room={el}
             onDelete={(roomID) => {
-              dispatch(
-                deleteRoom(roomID, (roomID) => {
-                  const newRooms = rooms.filter((room) => room.id !== roomID);
-                  dispatch(apiDispatch(GET_ROOMS, newRooms));
-                })
-              );
+              dispatch(removeInviteUser(roomID, { invitee: myEmail }));
             }}
           />
         ))}
       {rooms.length === 0 && (
         <Typography className="my-5" align="center">
-          No rooms available. Please create a room to proceed
+          No invititations
         </Typography>
       )}
     </Paper>
   );
 };
 
-export default RoomList;
+export default Invitations;

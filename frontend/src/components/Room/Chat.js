@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useState } from "react";
 import Drawer from "@material-ui/core/Drawer";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { makeStyles } from "@material-ui/core/styles";
 import { IconButton } from "@material-ui/core";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
-import WebSocketService from "../WebsocketService";
+import WebSocketService from "../../helper/WebsocketService";
 import TextField from "@material-ui/core/TextField";
 import { Send } from "@material-ui/icons";
 import InputAdornment from "@material-ui/core/InputAdornment";
@@ -58,7 +58,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const MessageItem = (props) => {
-  const theme = useTheme();
   const owner = useSelector((state) => state.userReducer.user);
   const classes = useStyles();
   let messagePosition =

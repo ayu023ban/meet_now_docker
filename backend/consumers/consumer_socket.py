@@ -27,7 +27,9 @@ class SocketConsumer(WebsocketConsumer):
         "send new message":self.new_message,
         "audioMedia":self.handle_audio_media,
         "videoMedia":self.handle_video_media,
-        "give join permission status":self.handle_join_permission_status
+        "give join permission status":self.handle_join_permission_status,
+        "user kick":self.handle_user_kick,
+        "user block":self.handle_user_block
         }
 
     def connect(self):
@@ -48,13 +50,15 @@ class SocketConsumer(WebsocketConsumer):
             final_data = getSerializedData(serialized_data)
             creator = room.creator
 
-            if user == creator:
+            if user == creator or room.invited_users.filter(id=user.id).exists():
                 room.users.add(user)
                 self.send_message("get permission",{"usable_id":user.id, "status":"accept"})
             else:
                 query = room.users.all().filter(id=creator.id)
                 if not query:
                     self.send_message("join message","creator not available")
+                elif room.blocked_users.filter(id=user.id).exists():
+                    self.send_message("join message","user blocked")
                 else:
                     self.broadcast("user want to join",{"user":final_data,"usable_id":creator.id})
 
@@ -119,6 +123,23 @@ class SocketConsumer(WebsocketConsumer):
                 user = User.objects.get(pk=data["userID"])    
                 room.users.add(user)
             self.broadcast("get permission",{"usable_id":data["userID"], "status":data["status"]})
+    
+    def handle_user_kick(self,data):
+        creator = self.scope["user"]
+        room = self.room
+        if creator == room.creator and creator.id != data["userID"]:
+            self.broadcast("user kicked",{"usable_id":data["userID"]})
+    
+    def handle_user_block(self,data):
+        creator = self.scope["user"]
+        room = self.room
+        if creator == room.creator and creator.id != data["userID"]:
+            try:
+                user = User.objects.get(id=data["userID"])
+                room.blocked_users.add(user)
+                self.broadcast("user blocked",{"usable_id":data["userID"]})
+            except User.DoesNotExist:
+                pass
 
     def receive(self, text_data):
         data = json.loads(text_data)

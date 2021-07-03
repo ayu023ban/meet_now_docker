@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import WebsocketService from "../components/WebsocketService";
+import WebsocketService from "../helper/WebsocketService";
 import { useParams } from "react-router";
 import Video from "../components/common/Video";
 import Controls from "../components/Room/Controls";
@@ -65,7 +65,10 @@ const socketFunctions = (
     receive_returned_signal(myID, peersRef)
   );
 
-  WebsocketService.on("user left", user_left_listener(peersRef, setPeers));
+  WebsocketService.on(
+    "user left",
+    user_left_listener(myID, peersRef, setPeers)
+  );
 
   WebsocketService.on("videoMedia", videoMediaListener(peersRef, setPeers));
 

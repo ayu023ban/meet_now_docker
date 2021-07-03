@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from "react";
-import WebSocketInstance from "../components/WebsocketService";
+import WebSocketInstance from "../helper/WebsocketService";
 import { useHistory, useParams } from "react-router";
 import Room from "./RoomView";
-import { getPermissionListener } from "../helper/socketListeners";
+import {
+  getPermissionListener,
+  joinMessageListener,
+  userBlockedListener,
+  userKickedListener,
+} from "../helper/socketListeners";
 import { useSelector } from "react-redux";
 import Typography from "@material-ui/core/Typography";
 import CircularProgress from "@material-ui/core/CircularProgress";
@@ -54,12 +59,12 @@ const View = () => {
       "get permission",
       getPermissionListener(myID, setAcceptStatus)
     );
-    WebSocketInstance.on("join message", (message) => {
-      if (message === "creator not available") setAcceptStatus("message");
-      setServerMessage(
-        "The creator has not joined the room yet. Please try joining after some time"
-      );
-    });
+    WebSocketInstance.on(
+      "join message",
+      joinMessageListener(setAcceptStatus, setServerMessage)
+    );
+    WebSocketInstance.on("user kicked", userKickedListener(myID, history));
+    WebSocketInstance.on("user blocked", userBlockedListener(myID, history));
     return () => {
       WebSocketInstance.close();
     };

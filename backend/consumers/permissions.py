@@ -12,3 +12,10 @@ class IsCreator(permissions.IsAuthenticated):
         if user is None:
             return False
         return user == obj.creator
+
+class IsUserInvited(permissions.IsAuthenticated):
+  def has_object_permission(self, request, view, obj):
+    user = request.user
+    if user is None:
+      return False
+    return obj.invited_users.filter(id=user.id).exists()

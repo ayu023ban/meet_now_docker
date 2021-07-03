@@ -2,9 +2,23 @@ import { Button, Paper, TextField, Typography } from "@material-ui/core";
 import React, { useState } from "react";
 import SendIcon from "@material-ui/icons/Send";
 import { makeStyles } from "@material-ui/styles";
-import { JOIN_ROOM_TYPE, DEMO_PATH, DEMO_CODE } from "../../constants";
+import { JOIN_ROOM_TYPE } from "../../constants";
 import { useHistory } from "react-router";
+import { useMediaQuery } from "@material-ui/core";
+import { useTheme } from "@material-ui/styles";
+import { checkUrl } from "../../helper/helperFunctions";
+
 const useStyles = makeStyles((theme) => ({
+  container: {
+    width: "calc(100% - 10rem)",
+    [theme.breakpoints.down("sm")]: {
+      width: "100%",
+    },
+    minHeight: "7rem",
+    borderRadius: "2rem",
+    padding: "1rem",
+    marginTop: "2rem",
+  },
   button: {
     margin: theme.spacing(1),
     float: "right",
@@ -15,63 +29,16 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const checkUrl = (url) => {
-  const result = {
-    type: JOIN_ROOM_TYPE.URL,
-    is_correct: true,
-    error_message: "",
-  };
-  try {
-    const new_url = new URL(url);
-    if (new_url.hostname !== window.location.hostname) {
-      result.is_correct = false;
-      result.error_message = `host of url should be ${window.location.hostname}`;
-      return result;
-    }
-    const path = new_url.pathname;
-    const demo_url = new URL(DEMO_PATH);
-    if (path.length < demo_url.pathname.length) {
-      result.is_correct = false;
-      result.error_message = "url path too short";
-      return result;
-    } else if (path.length > demo_url.pathname.length) {
-      result.is_correct = false;
-      result.error_message = "url path too long";
-      return result;
-    }
-  } catch {
-    result.type = JOIN_ROOM_TYPE.CODE;
-    if (url.length < DEMO_CODE.length) {
-      result.is_correct = false;
-      result.error_message = "code is too short";
-      return result;
-    }
-    if (url.length > DEMO_CODE.length) {
-      result.is_correct = false;
-      result.error_message = "code is too long";
-      return result;
-    }
-  }
-  return result;
-};
-
 const JoinRoom = () => {
   const classes = useStyles();
   const [roomName, setRoomName] = useState("");
   const [isError, setIsError] = useState("");
   const history = useHistory();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   return (
-    <Paper
-      elevation={3}
-      style={{
-        minWidth: "35rem",
-        minHeight: "7rem",
-        borderRadius: "2rem",
-        padding: "1rem",
-        marginTop: "2rem",
-      }}
-    >
-      <Typography variant="h2" align="center">
+    <Paper elevation={3} className={classes.container}>
+      <Typography variant={isMobile ? "h5" : "h2"} align="center">
         Join Room
       </Typography>
       <div className={classes.row}>

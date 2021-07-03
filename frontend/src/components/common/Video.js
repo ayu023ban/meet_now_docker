@@ -1,7 +1,13 @@
-import { IconButton, makeStyles } from "@material-ui/core";
-import React, { useEffect, useRef, useState } from "react";
+import { IconButton, makeStyles, Tooltip } from "@material-ui/core";
+import React, { useEffect, useRef } from "react";
 import MicOffIcon from "@material-ui/icons/MicOff";
 import Avatar from "@material-ui/core/Avatar";
+import Fade from "@material-ui/core/Fade";
+import RemoveCircleOutlineIcon from "@material-ui/icons/RemoveCircleOutline";
+import WebSocketInstance from "../../helper/WebsocketService";
+import { useSelector } from "react-redux";
+import BlockIcon from "@material-ui/icons/Block";
+import { toast } from "react-toastify";
 
 const useStyles = makeStyles((theme) => ({
   responsive: ({ size, rows }) => ({
@@ -40,6 +46,16 @@ const useStyles = makeStyles((theme) => ({
     height: "min(50%, 10rem)",
     fontSize: "3rem",
   },
+  hoverDiv: {
+    position: "absolute",
+    top: "0",
+    left: "0",
+    width: "100%",
+    height: "100%",
+  },
+  remove: {
+    color: "#eee8d5",
+  },
 }));
 
 const Video = React.forwardRef(
@@ -47,6 +63,12 @@ const Video = React.forwardRef(
     const localRef = useRef(null);
     const currentRef = ref || localRef;
     const classes = useStyles({ size, rows });
+    const [open, setOpen] = React.useState(false);
+    const isCreator = useSelector((state) => state.roomReducer.isUserCreator);
+    const invitedUsers = useSelector(
+      (state) => state.roomReducer.currentRoom.invited_users
+    );
+
     let initials =
       (user.first_name ? user.first_name[0].toUpperCase() : "") +
       (user.last_name ? user.last_name[0].toUpperCase() : "");
@@ -57,6 +79,16 @@ const Video = React.forwardRef(
         });
       }
     }, []);
+    const removeUser = () => {
+      WebSocketInstance.sendMessage("user kick", { userID: user.id });
+    };
+    const blockUser = () => {
+      if (invitedUsers.some((el) => el.id === user.id)) {
+        toast.error("user is invited. first remove the invitation");
+      } else {
+        WebSocketInstance.sendMessage("user block", { userID: user.id });
+      }
+    };
     return (
       <div className={classes.responsive}>
         <div className={classes.videoTop}>
@@ -75,7 +107,44 @@ const Video = React.forwardRef(
             autoPlay
             muted={muted}
             ref={currentRef}
+            onClick={() => {}}
+            onMouseEnter={() => {
+              setOpen(true);
+            }}
           />
+          {isCreator && !isUserVideo && open && (
+            <Fade in={open}>
+              <div
+                className={classes.hoverDiv}
+                onMouseLeave={() => {
+                  setOpen(false);
+                }}
+              >
+                <div
+                  style={{
+                    opacity: 0.6,
+                    background: "black",
+                    width: "100%",
+                    height: "100%",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <Tooltip title="remove user">
+                    <IconButton className={classes.remove} onClick={removeUser}>
+                      <RemoveCircleOutlineIcon fontSize="large" />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Block user">
+                    <IconButton className={classes.remove} onClick={blockUser}>
+                      <BlockIcon fontSize="large" />
+                    </IconButton>
+                  </Tooltip>
+                </div>
+              </div>
+            </Fade>
+          )}
           {!user.audioOn && (
             <IconButton className={classes.micOff}>
               <MicOffIcon />

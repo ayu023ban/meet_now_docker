@@ -1,5 +1,5 @@
 import { toast } from "react-toastify";
-import WebsocketService from "../components/WebsocketService";
+import WebsocketService from "./WebsocketService";
 import { getFullName } from "../helper/utilFunctions";
 import { getUniqueArray } from "./helperFunctions";
 import { addPeer, createPeer } from "./peers";
@@ -57,7 +57,7 @@ export const receive_returned_signal = (myID, peersRef) => (payload) => {
   }
 };
 
-export const user_left_listener = (peersRef, setPeers) => (payload) => {
+export const user_left_listener = (myID, peersRef, setPeers) => (payload) => {
   const user = payload.user;
   if (peersRef.current[user.id]) {
     peersRef.current[user.id].peer.destroy();
@@ -67,7 +67,9 @@ export const user_left_listener = (peersRef, setPeers) => (payload) => {
     const { [payload.user.id]: remove, ...rest } = peers;
     return rest;
   });
-  toast.info(`${getFullName(user.first_name, user.last_name)} left`);
+  if (payload.user.id !== myID) {
+    toast.info(`${getFullName(user.first_name, user.last_name)} left`);
+  }
 };
 
 export const videoMediaListener = (peersRef, setPeers) => (payload) => {
@@ -112,5 +114,35 @@ export const getPermissionRequestListener =
         const newUsers = getUniqueArray(users, "id");
         return newUsers;
       });
+    }
+  };
+
+export const userKickedListener = (myID, history) => (payload) => {
+  if (payload.usable_id === myID) {
+    history.replace("/", {
+      message: "The Organisor removed you from room",
+      type: "error",
+    });
+  }
+};
+
+export const userBlockedListener = (myID, history) => (payload) => {
+  if (payload.usable_id === myID) {
+    history.replace("/", {
+      message: "The Organisor blocked you from room",
+      type: "error",
+    });
+  }
+};
+
+export const joinMessageListener =
+  (setAcceptStatus, setServerMessage) => (message) => {
+    setAcceptStatus("message");
+    if (message === "creator not available") {
+      setServerMessage(
+        "The Organisor has not joined the room yet. Please try joining after some time"
+      );
+    } else if (message === "user blocked") {
+      setServerMessage("The Organisor has blocked you.");
     }
   };

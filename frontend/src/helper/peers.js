@@ -1,5 +1,5 @@
 import Peer from "simple-peer";
-import WebsocketService from "../components/WebsocketService";
+import WebsocketService from "./WebsocketService";
 
 export function createPeer(userToSignal, callerID, stream) {
   const peer = new Peer({

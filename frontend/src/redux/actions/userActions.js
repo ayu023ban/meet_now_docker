@@ -8,6 +8,7 @@ import {
   SET_TOKEN,
   LOGGEDINORNOT,
   GET_USER_PENDING,
+  GET_INVITATION,
 } from "./userActionTypes";
 
 import {
@@ -15,6 +16,7 @@ import {
   facebookLogin,
   get_user,
   logout,
+  getInvites,
 } from "../../config/backend_api";
 import { apiDispatch, apiError } from "../../helper/helperFunctions";
 
@@ -125,6 +127,15 @@ export const LogOut = () => {
     const url = logout;
     apiClient.post(url).then((res) => {
       dispatch(apiDispatch(LOGGEDINORNOT, false));
+    });
+  };
+};
+
+export const getInvitations = () => {
+  const url = getInvites;
+  return (dispatch) => {
+    apiClient.get(url).then((res) => {
+      dispatch(apiDispatch(GET_INVITATION, res.data));
     });
   };
 };

@@ -15,9 +15,11 @@ import {
   get_room,
   invite,
   isUserCreator,
+  removeInvite,
 } from "../../config/backend_api";
 
 import { apiDispatch, getUrlFromCode } from "../../helper/helperFunctions";
+import { getInvitations } from "./userActions";
 
 export const createNewRoom = (data) => {
   const url = create_room;
@@ -49,6 +51,15 @@ export const getRooms = () => {
   };
 };
 
+export const deleteRoom = (roomID, fallback) => {
+  const url = `${get_room}${roomID}/`;
+  return (dispatch, getState) => {
+    apiClient.delete(url).then((res) => {
+      fallback(roomID);
+    });
+  };
+};
+
 export const getRoom = (roomID) => {
   const url = `${get_room}${roomID}/`;
   return (dispatch) => {
@@ -75,10 +86,26 @@ export const inviteUser = (roomId, data) => {
     apiClient
       .post(url, data)
       .then((res) => {
+        dispatch(apiDispatch(GET_ROOM, res.data));
         toast.success("user invited");
       })
       .catch((err) => {
-        toast.error(err.data);
+        toast.error(err.response.data);
+      });
+  };
+};
+
+export const removeInviteUser = (roomID, data) => {
+  const url = removeInvite(roomID);
+  return (dispatch) => {
+    apiClient
+      .post(url, data)
+      .then((res) => {
+        dispatch(apiDispatch(GET_ROOM, res.data));
+        dispatch(getInvitations());
+      })
+      .catch((err) => {
+        toast.error(err.response.data);
       });
   };
 };
@@ -87,7 +114,6 @@ export const getIsUserCreator = (roomId) => {
   const url = isUserCreator(roomId);
   return (dispatch) => {
     apiClient.get(url).then((res) => {
-      console.log(res);
       dispatch(apiDispatch(SET_USER_IS_CREATOR, res.data.isCreator));
     });
   };

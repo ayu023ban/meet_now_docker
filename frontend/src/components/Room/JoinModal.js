@@ -4,7 +4,7 @@ import { Modal, Row, Col } from "react-bootstrap";
 import CloseIcon from "@material-ui/icons/Close";
 import CheckIcon from "@material-ui/icons/Check";
 import { makeStyles } from "@material-ui/styles";
-import WebSocketInstance from "../WebsocketService";
+import WebSocketInstance from "../../helper/WebsocketService";
 
 const useStyles = makeStyles((theme) => ({
   modal: {

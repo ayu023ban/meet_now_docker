@@ -1,5 +1,14 @@
-import { Grid, IconButton, makeStyles, Paper } from "@material-ui/core";
-import React from "react";
+import {
+  Grid,
+  IconButton,
+  makeStyles,
+  Paper,
+  Typography,
+  Tooltip,
+  Menu,
+  MenuItem,
+} from "@material-ui/core";
+import React, { useState } from "react";
 import { red } from "@material-ui/core/colors";
 import MicIcon from "@material-ui/icons/Mic";
 import CallEndIcon from "@material-ui/icons/CallEnd";
@@ -7,10 +16,16 @@ import MicOffIcon from "@material-ui/icons/MicOff";
 import VideocamOutlinedIcon from "@material-ui/icons/VideocamOutlined";
 import VideocamOffOutlinedIcon from "@material-ui/icons/VideocamOffOutlined";
 import MessageOutlinedIcon from "@material-ui/icons/MessageOutlined";
-import FlipCameraIosOutlinedIcon from "@material-ui/icons/FlipCameraIosOutlined";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleAudio, toggleVideo } from "../../redux/actions/roomActions";
 import { useHistory } from "react-router";
+import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
+import PersonAddIcon from "@material-ui/icons/PersonAdd";
+import DetailModal from "./DetailModal";
+import InviteModal from "./InviteModal";
+import { useMediaQuery } from "@material-ui/core";
+import { useTheme } from "@material-ui/styles";
+import MoreVertIcon from "@material-ui/icons/MoreVert";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -30,10 +45,21 @@ const Controls = ({ switchc, toggleChat }) => {
   const dispatch = useDispatch();
   const isAudioOn = useSelector((state) => state.roomReducer.userVideo.audioOn);
   const isVideoOn = useSelector((state) => state.roomReducer.userVideo.videoOn);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const history = useHistory();
+  const roomName = useSelector(
+    (state) => state.roomReducer.currentRoom.room_name
+  );
+  const isUserCreator = useSelector((state) => state.roomReducer.isUserCreator);
   const leftRoom = () => {
     history.replace("/");
   };
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const isMenuOpen = Boolean(anchorEl);
+
   return (
     <Paper elevation={3} className={classes.container}>
       <Grid
@@ -43,41 +69,121 @@ const Controls = ({ switchc, toggleChat }) => {
         style={{ height: "100%" }}
       >
         <div>
-          <IconButton
-            color="inherit"
-            onClick={() => {
-              switchc();
-            }}
-          >
-            <FlipCameraIosOutlinedIcon />
-          </IconButton>
+          <Typography variant="h5" style={{ marginLeft: "1rem" }}>
+            {roomName}
+          </Typography>
         </div>
         <div>
-          <IconButton
-            color="inherit"
-            onClick={() => {
-              dispatch(toggleAudio());
-            }}
-          >
-            {isAudioOn ? <MicIcon /> : <MicOffIcon />}
-          </IconButton>
-          <IconButton color="inherit" onClick={leftRoom}>
-            <CallEndIcon className={classes.orange} />
-          </IconButton>
-          <IconButton
-            color="inherit"
-            onClick={() => {
-              dispatch(toggleVideo());
-            }}
-          >
-            {isVideoOn ? <VideocamOutlinedIcon /> : <VideocamOffOutlinedIcon />}
-          </IconButton>
+          <Tooltip title={isAudioOn ? "Mic On" : "Mic off"}>
+            <IconButton
+              color="inherit"
+              onClick={() => {
+                dispatch(toggleAudio());
+              }}
+            >
+              {isAudioOn ? <MicIcon /> : <MicOffIcon />}
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="end call">
+            <IconButton color="inherit" onClick={leftRoom}>
+              <CallEndIcon className={classes.orange} />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title={isVideoOn ? "video on" : "video off"}>
+            <IconButton
+              color="inherit"
+              onClick={() => {
+                dispatch(toggleVideo());
+              }}
+            >
+              {isVideoOn ? (
+                <VideocamOutlinedIcon />
+              ) : (
+                <VideocamOffOutlinedIcon />
+              )}
+            </IconButton>
+          </Tooltip>
         </div>
-        <div className={classes.right}>
-          <IconButton onClick={toggleChat}>
-            <MessageOutlinedIcon />
-          </IconButton>
-        </div>
+        {!isMobile && (
+          <div className={classes.right}>
+            {isUserCreator && (
+              <Tooltip title="invite users">
+                <IconButton
+                  onClick={() => {
+                    setInviteModalOpen((o) => !o);
+                  }}
+                >
+                  <PersonAddIcon />
+                </IconButton>
+              </Tooltip>
+            )}
+            <Tooltip title="Meeting Details">
+              <IconButton
+                onClick={() => {
+                  setDetailModalOpen((o) => !o);
+                }}
+              >
+                <InfoOutlinedIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Chat">
+              <IconButton onClick={toggleChat}>
+                <MessageOutlinedIcon />
+              </IconButton>
+            </Tooltip>
+          </div>
+        )}
+        {isMobile && (
+          <div className={classes.right}>
+            <IconButton
+              aria-controls="simple-theme-menu"
+              aria-haspopup="true"
+              color="inherit"
+              className="header-title-button"
+              onClick={(event) => setAnchorEl(event.currentTarget)}
+            >
+              <MoreVertIcon />
+            </IconButton>
+            <Menu
+              anchorEl={anchorEl}
+              id={"controls-menu"}
+              keepMounted
+              open={isMenuOpen}
+              onClose={() => {
+                setAnchorEl(null);
+              }}
+            >
+              <MenuItem
+                onClick={() => {
+                  setAnchorEl(null);
+                  setInviteModalOpen((o) => !o);
+                }}
+              >
+                Invite User
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setAnchorEl(null);
+                  setDetailModalOpen((o) => !o);
+                }}
+              >
+                Meeting Details
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setAnchorEl(null);
+                  toggleChat();
+                }}
+              >
+                Chat
+              </MenuItem>
+            </Menu>
+          </div>
+        )}
+        {isUserCreator && (
+          <InviteModal open={inviteModalOpen} setOpen={setInviteModalOpen} />
+        )}
+        <DetailModal open={detailModalOpen} setOpen={setDetailModalOpen} />
       </Grid>
     </Paper>
   );
