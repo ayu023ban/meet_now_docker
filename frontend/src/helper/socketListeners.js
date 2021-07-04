@@ -9,7 +9,10 @@ export const all_users_listener =
     peersRef.current = {};
     const temp = {};
     users.forEach((user) => {
-      if (myID !== user.id) {
+      if (
+        myID !== user.id &&
+        !Object.keys(peersRef.current).includes(user.id)
+      ) {
         const peer = createPeer(user.id, myID, stream);
 
         peersRef.current[user.id] = { user, peer };

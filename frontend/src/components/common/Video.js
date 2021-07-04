@@ -1,4 +1,4 @@
-import { IconButton, makeStyles, Tooltip } from "@material-ui/core";
+import { IconButton, makeStyles, Tooltip, Typography } from "@material-ui/core";
 import React, { useEffect, useRef } from "react";
 import MicOffIcon from "@material-ui/icons/MicOff";
 import Avatar from "@material-ui/core/Avatar";
@@ -12,8 +12,8 @@ import { toast } from "react-toastify";
 const useStyles = makeStyles((theme) => ({
   responsive: ({ size, rows }) => ({
     float: "left",
-    width: `${100 / size}%`,
-    height: `${100 / rows}%`,
+    width: `${100 / size - 2}%`,
+    height: `${100 / rows - 2}%`,
     display: "flex",
     alignItems: "center",
   }),
@@ -54,7 +54,14 @@ const useStyles = makeStyles((theme) => ({
     height: "100%",
   },
   remove: {
-    color: "#eee8d5",
+    color: "white",
+    "&:disabled": { color: "#444" },
+  },
+  name: {
+    position: "absolute",
+    bottom: "0.5rem",
+    left: "1rem",
+    color: "white",
   },
 }));
 
@@ -68,10 +75,17 @@ const Video = React.forwardRef(
     const invitedUsers = useSelector(
       (state) => state.roomReducer.currentRoom.invited_users
     );
-
+    const mangoRef = useRef(null);
+    if (mangoRef.current) {
+      console.log(mangoRef.current.getBoundingClientRect());
+    }
     let initials =
       (user.first_name ? user.first_name[0].toUpperCase() : "") +
       (user.last_name ? user.last_name[0].toUpperCase() : "");
+    let fullName = user.first_name + " " + user.last_name;
+    fullName = fullName.trim();
+    if (isUserVideo) fullName = "You";
+
     useEffect(() => {
       if (peer) {
         peer.on("stream", (stream) => {
@@ -80,9 +94,11 @@ const Video = React.forwardRef(
       }
     }, []);
     const removeUser = () => {
+      if (!isCreator || isUserVideo) return;
       WebSocketInstance.sendMessage("user kick", { userID: user.id });
     };
     const blockUser = () => {
+      if (!isCreator || isUserVideo) return;
       if (invitedUsers.some((el) => el.id === user.id)) {
         toast.error("user is invited. first remove the invitation");
       } else {
@@ -90,7 +106,7 @@ const Video = React.forwardRef(
       }
     };
     return (
-      <div className={classes.responsive}>
+      <div className={classes.responsive} ref={mangoRef}>
         <div className={classes.videoTop}>
           <video
             style={{
@@ -112,39 +128,48 @@ const Video = React.forwardRef(
               setOpen(true);
             }}
           />
-          {isCreator && !isUserVideo && open && (
-            <Fade in={open}>
+          <Fade in={open}>
+            <div
+              className={classes.hoverDiv}
+              onMouseLeave={() => {
+                setOpen(false);
+              }}
+            >
               <div
-                className={classes.hoverDiv}
-                onMouseLeave={() => {
-                  setOpen(false);
+                style={{
+                  opacity: 0.6,
+                  background: "black",
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
                 }}
               >
-                <div
-                  style={{
-                    opacity: 0.6,
-                    background: "black",
-                    width: "100%",
-                    height: "100%",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  <Tooltip title="remove user">
-                    <IconButton className={classes.remove} onClick={removeUser}>
-                      <RemoveCircleOutlineIcon fontSize="large" />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Block user">
-                    <IconButton className={classes.remove} onClick={blockUser}>
-                      <BlockIcon fontSize="large" />
-                    </IconButton>
-                  </Tooltip>
-                </div>
+                <Tooltip title="remove user">
+                  <IconButton
+                    className={classes.remove}
+                    onClick={removeUser}
+                    disabled={!isCreator || isUserVideo}
+                  >
+                    <RemoveCircleOutlineIcon fontSize="large" />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Block user">
+                  <IconButton
+                    className={classes.remove}
+                    onClick={blockUser}
+                    disabled={!isCreator || isUserVideo}
+                  >
+                    <BlockIcon fontSize="large" />
+                  </IconButton>
+                </Tooltip>
+                <Typography variant="p" className={classes.name}>
+                  {fullName}
+                </Typography>
               </div>
-            </Fade>
-          )}
+            </div>
+          </Fade>
           {!user.audioOn && (
             <IconButton className={classes.micOff}>
               <MicOffIcon />
