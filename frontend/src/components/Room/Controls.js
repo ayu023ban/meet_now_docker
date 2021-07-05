@@ -26,6 +26,8 @@ import InviteModal from "./InviteModal";
 import { useMediaQuery } from "@material-ui/core";
 import { useTheme } from "@material-ui/styles";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
+import ScreenShareOutlinedIcon from "@material-ui/icons/ScreenShareOutlined";
+import FlipCameraAndroidIcon from "@material-ui/icons/FlipCameraAndroid";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -40,7 +42,7 @@ const useStyles = makeStyles((theme) => ({
   right: { marginRight: "1rem" },
 }));
 
-const Controls = ({ switchc, toggleChat }) => {
+const Controls = ({ switchc, shareScreen, toggleChat }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const isAudioOn = useSelector((state) => state.roomReducer.userVideo.audioOn);
@@ -103,9 +105,29 @@ const Controls = ({ switchc, toggleChat }) => {
               )}
             </IconButton>
           </Tooltip>
+          <Tooltip title="share screen">
+            <IconButton
+              color="inherit"
+              onClick={() => {
+                shareScreen();
+              }}
+            >
+              <ScreenShareOutlinedIcon />
+            </IconButton>
+          </Tooltip>
         </div>
         {!isMobile && (
           <div className={classes.right}>
+            <Tooltip title="switch camera">
+              <IconButton
+                color="inherit"
+                onClick={() => {
+                  switchc();
+                }}
+              >
+                <FlipCameraAndroidIcon />
+              </IconButton>
+            </Tooltip>
             {isUserCreator && (
               <Tooltip title="invite users">
                 <IconButton

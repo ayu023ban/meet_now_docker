@@ -6,28 +6,6 @@ export function createPeer(userToSignal, callerID, stream) {
     initiator: true,
     trickle: false,
     stream,
-    // iceTransportPolicy: "relay",
-    // reconnectTimer: 100,
-    // config: {
-    //   iceServers: [
-    //     {
-    //       urls: [
-    //         "stun:stun.l.google.com:19302",
-    //         "stun:global.stun.twilio.com:3478",
-    //       ],
-    //     },
-    //     {
-    //       urls: "stun:numb.viagenie.ca",
-    //       username: "ayu023ban@gmail.com",
-    //       credential: "Manju2000@",
-    //     },
-    //     {
-    //       urls: "turn:numb.viagenie.ca",
-    //       username: "ayu023ban@gmail.com",
-    //       credential: "Manju2000@",
-    //     },
-    //   ],
-    // },
   });
   peer.on("signal", (signal) => {
     WebsocketService.sendMessage("sending signal", {
@@ -44,28 +22,6 @@ export function addPeer(incomingSignal, callerID, stream) {
     initiator: false,
     trickle: false,
     stream,
-    // iceTransportPolicy: "relay",
-    // reconnectTimer: 100,
-    // config: {
-    //   iceServers: [
-    //     {
-    //       urls: [
-    //         "stun:stun.l.google.com:19302",
-    //         "stun:global.stun.twilio.com:3478",
-    //       ],
-    //     },
-    //     {
-    //       urls: "stun:numb.viagenie.ca",
-    //       username: "ayu023ban@gmail.com",
-    //       credential: "Manju2000@",
-    //     },
-    //     {
-    //       urls: "turn:numb.viagenie.ca",
-    //       username: "ayu023ban@gmail.com",
-    //       credential: "Manju2000@",
-    //     },
-    //   ],
-    // },
   });
   peer.on("signal", (signal) => {
     WebsocketService.sendMessage("returning signal", { signal, callerID });

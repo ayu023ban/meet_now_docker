@@ -16,6 +16,8 @@ def getSerializedData(serialized_data):
     data = JSONParser().parse(stream)
     return data
 
+videoMedia={}
+audioMedia={}
 class SocketConsumer(WebsocketConsumer):
 
     def __init__(self, *args, **kwargs):
@@ -29,8 +31,10 @@ class SocketConsumer(WebsocketConsumer):
         "videoMedia":self.handle_video_media,
         "give join permission status":self.handle_join_permission_status,
         "user kick":self.handle_user_kick,
-        "user block":self.handle_user_block
+        "user block":self.handle_user_block,
+        "get media":self.get_media
         }
+        
 
     def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
@@ -92,7 +96,7 @@ class SocketConsumer(WebsocketConsumer):
         users = self.room.users.all().exclude(id=user.id)
         serialized_data = UserSerializer(users,many=True)
         final_data = getSerializedData(serialized_data.data)
-        self.broadcast("all users",final_data )
+        self.send_message("all users",final_data )
     
     def send_signal(self,data):
         user = User.objects.get(pk=data["callerID"])
@@ -110,10 +114,16 @@ class SocketConsumer(WebsocketConsumer):
         self.broadcast("receive new message",{"sender":{"id":user.id,"first_name":user.first_name,"last_name":user.last_name},"message":data})
     
     def handle_audio_media(self,data):
+        audioMedia[data["userID"]] = data["audioOn"]
         self.broadcast("audioMedia",data)
 
     def handle_video_media(self,data):
+        videoMedia[data["userID"]] = data["videoOn"]
         self.broadcast("videoMedia",data)
+    
+    def get_media(self,data):
+        self.send_message("get media", {"audio":audioMedia,"video":videoMedia})
+
     
     def handle_join_permission_status(self,data):
         creator = self.scope["user"]
@@ -148,6 +158,7 @@ class SocketConsumer(WebsocketConsumer):
             fun(data['data'])
 
     def send_message(self,command, content):
+        
         s = json.dumps({"command":command,"data":content})
         self.send(text_data=s)
 

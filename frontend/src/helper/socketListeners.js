@@ -28,7 +28,6 @@ export const user_joined_listener =
     const user = payload.callerUser;
     if (payload.usable_id === myID) {
       const peer = addPeer(payload.signal, user.id, stream);
-      // if (!Boolean(peersRef.current[user.id])) {
       peersRef.current[user.id] = { user, peer };
       setPeers((peers) => ({
         ...peers,
@@ -37,7 +36,15 @@ export const user_joined_listener =
           peer: peer,
         },
       }));
-      // }
+      toast.info(`${getFullName(user.first_name, user.last_name)} joined`);
+    }
+  };
+
+export const receive_returned_signal = (myID, peersRef, isUserAudioOn, isUserVideoOn) => (payload) => {
+    if (payload.usable_id === myID) {
+      const { peer } = peersRef.current[payload.id];
+      peer.signal(payload.signal);
+
       WebsocketService.sendMessage("audioMedia", {
         userID: myID,
         audioOn: isUserAudioOn,
@@ -46,16 +53,9 @@ export const user_joined_listener =
         userID: myID,
         videoOn: isUserVideoOn,
       });
-      toast.info(`${getFullName(user.first_name, user.last_name)} joined`);
+      WebsocketService.sendMessage("get media", "");
     }
   };
-
-export const receive_returned_signal = (myID, peersRef) => (payload) => {
-  if (payload.usable_id === myID) {
-    const { peer } = peersRef.current[payload.id];
-    peer.signal(payload.signal);
-  }
-};
 
 export const user_left_listener = (myID, peersRef, setPeers) => (payload) => {
   const user = payload.user;
@@ -98,6 +98,29 @@ export const audioMediaListener = (peersRef, setPeers) => (payload) => {
       };
     });
   }
+};
+
+export const getMediaListener = (peersRef, setPeers) => (payload) => {
+  console.log(payload);
+  for (let key in peersRef.current) {
+    if (payload.audio[key]) {
+      peersRef.current[key].user.audioOn = payload.audio[key];
+    }
+    if (payload.video[key]) {
+      peersRef.current[key].user.videoOn = payload.video[key];
+    }
+  }
+  setPeers((peers) => {
+    for (let key in peers) {
+      if (payload.audio[key]) {
+        peers[key].user.audioOn = payload.audio[key];
+      }
+      if (payload.video[key]) {
+        peers[key].user.videoOn = payload.video[key];
+      }
+    }
+    return { ...peers };
+  });
 };
 
 export const getPermissionListener = (myID, setAcceptStatus) => (payload) => {

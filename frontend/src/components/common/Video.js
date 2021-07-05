@@ -60,7 +60,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Video = React.forwardRef(
-  ({ peer, muted, size, rows, isUserVideo, user }, ref) => {
+  ({ peer, muted, size, rows, isUserVideo, user, isSharingScreen }, ref) => {
     const localRef = useRef(null);
     const currentRef = ref || localRef;
     const classes = useStyles({ size, rows });
@@ -69,6 +69,7 @@ const Video = React.forwardRef(
     const invitedUsers = useSelector(
       (state) => state.roomReducer.currentRoom.invited_users
     );
+
     const mangoRef = useRef(null);
     const videoWidth = mangoRef.current
       ? (mangoRef.current.getBoundingClientRect().width * 9) / 16 <
@@ -86,6 +87,7 @@ const Video = React.forwardRef(
             (0.95 * mangoRef.current.getBoundingClientRect().width * 9) / 16
           }px`
       : "auto";
+
     let initials =
       (user.first_name ? user.first_name[0].toUpperCase() : "") +
       (user.last_name ? user.last_name[0].toUpperCase() : "");
@@ -119,7 +121,6 @@ const Video = React.forwardRef(
           style={{
             width: videoWidth,
             height: videoHeight,
-            // paddingTop: "min(calc(100vh - 9rem), 56.25%)",
             position: "relative",
             overflow: "hidden",
             margin: "auto",
@@ -129,7 +130,7 @@ const Video = React.forwardRef(
           <video
             style={{
               objectFit: "contain",
-              transform: isUserVideo ? "scaleX(-1)" : 1,
+              transform: isUserVideo && !isSharingScreen ? "scaleX(-1)" : 1,
               position: "absolute",
               top: "0",
               left: "0",

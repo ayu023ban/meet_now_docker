@@ -15,9 +15,10 @@ import {
   videoMediaListener,
   audioMediaListener,
   getPermissionRequestListener,
+  getMediaListener,
 } from "../helper/socketListeners";
 import JoinModal from "../components/Room/JoinModal";
-import { switchCamera } from "../helper/unusedFunctions";
+import { shareScreen, switchCamera } from "../helper/unusedFunctions";
 import { getIsUserCreator, getRoom } from "../redux/actions/roomActions";
 
 let videoConstraints = {
@@ -62,7 +63,7 @@ const socketFunctions = (
 
   WebsocketService.on(
     "receiving returned signal",
-    receive_returned_signal(myID, peersRef)
+    receive_returned_signal(myID, peersRef, isUserAudioOn, isUserVideoOn)
   );
 
   WebsocketService.on(
@@ -77,6 +78,7 @@ const socketFunctions = (
     "user want to join",
     getPermissionRequestListener(myID, setWaitingUsers)
   );
+  WebsocketService.on("get media", getMediaListener(peersRef, setPeers));
 };
 
 const Room = () => {
@@ -100,7 +102,7 @@ const Room = () => {
   const me = useSelector((state) => state.userReducer.user);
   const [waitingUsers, setWaitingUsers] = useState([]);
   const dispatch = useDispatch();
-
+  const [isSharingScreen, setIsSharingScreen] = useState(false);
   const setCameraStream = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: true,
@@ -198,8 +200,9 @@ const Room = () => {
           size={sizeMap[1]}
           rows={sizeMap["rows"]}
           isUserVideo
+          isSharingScreen
         />
-        {Object.values(peersRef.current).map((item, index) => {
+        {Object.values(peers).map((item, index) => {
           return (
             <Video
               key={index}
@@ -217,7 +220,21 @@ const Room = () => {
       />
       <Controls
         switchc={() => {
-          switchCamera(videoConstraints)(currentCameraRef);
+          switchCamera(
+            peersRef,
+            setPeers,
+            userStream,
+            videoConstraints
+          )(currentCameraRef);
+        }}
+        shareScreen={() => {
+          shareScreen(
+            peersRef,
+            setPeers,
+            videoConstraints,
+            userStream,
+            setIsSharingScreen
+          );
         }}
         toggleChat={() => {
           setChatOpen((open) => !open);
