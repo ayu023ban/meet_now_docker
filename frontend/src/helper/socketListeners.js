@@ -9,10 +9,7 @@ export const all_users_listener =
     peersRef.current = {};
     const temp = {};
     users.forEach((user) => {
-      if (
-        myID !== user.id &&
-        !Object.keys(peersRef.current).includes(user.id)
-      ) {
+      if (myID !== user.id) {
         const peer = createPeer(user.id, myID, stream);
 
         peersRef.current[user.id] = { user, peer };
@@ -31,16 +28,16 @@ export const user_joined_listener =
     const user = payload.callerUser;
     if (payload.usable_id === myID) {
       const peer = addPeer(payload.signal, user.id, stream);
-      if (!Boolean(peersRef.current[user.id])) {
-        peersRef.current[user.id] = { user, peer };
-        setPeers((peers) => ({
-          ...peers,
-          [user.id]: {
-            user: user,
-            peer: peer,
-          },
-        }));
-      }
+      // if (!Boolean(peersRef.current[user.id])) {
+      peersRef.current[user.id] = { user, peer };
+      setPeers((peers) => ({
+        ...peers,
+        [user.id]: {
+          user: user,
+          peer: peer,
+        },
+      }));
+      // }
       WebsocketService.sendMessage("audioMedia", {
         userID: myID,
         audioOn: isUserAudioOn,

@@ -89,7 +89,7 @@ class SocketConsumer(WebsocketConsumer):
     def join_room(self,roomID):
         user = self.scope["user"]
         self.room.users.add(user)
-        users = self.room.users.all()
+        users = self.room.users.all().exclude(id=user.id)
         serialized_data = UserSerializer(users,many=True)
         final_data = getSerializedData(serialized_data.data)
         self.broadcast("all users",final_data )

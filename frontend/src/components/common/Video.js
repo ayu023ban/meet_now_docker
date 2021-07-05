@@ -18,13 +18,7 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
   }),
   videoTop: {
-    width: "95%",
-    paddingTop: "min(calc(100vh - 9rem), 56.25%)",
-    position: "relative",
-    overflow: "hidden",
     background: theme.palette.background.paper,
-    margin: "auto",
-    borderRadius: "1rem",
   },
   micOff: {
     position: "absolute",
@@ -76,9 +70,22 @@ const Video = React.forwardRef(
       (state) => state.roomReducer.currentRoom.invited_users
     );
     const mangoRef = useRef(null);
-    if (mangoRef.current) {
-      console.log(mangoRef.current.getBoundingClientRect());
-    }
+    const videoWidth = mangoRef.current
+      ? (mangoRef.current.getBoundingClientRect().width * 9) / 16 <
+        mangoRef.current.getBoundingClientRect().height
+        ? `${0.95 * mangoRef.current.getBoundingClientRect().width}px`
+        : `${
+            (0.95 * mangoRef.current.getBoundingClientRect().height * 16) / 9
+          }px`
+      : "auto";
+    const videoHeight = mangoRef.current
+      ? (mangoRef.current.getBoundingClientRect().width * 9) / 16 >
+        mangoRef.current.getBoundingClientRect().height
+        ? `${0.95 * mangoRef.current.getBoundingClientRect().height}px`
+        : `${
+            (0.95 * mangoRef.current.getBoundingClientRect().width * 9) / 16
+          }px`
+      : "auto";
     let initials =
       (user.first_name ? user.first_name[0].toUpperCase() : "") +
       (user.last_name ? user.last_name[0].toUpperCase() : "");
@@ -107,7 +114,18 @@ const Video = React.forwardRef(
     };
     return (
       <div className={classes.responsive} ref={mangoRef}>
-        <div className={classes.videoTop}>
+        <div
+          className={classes.videoTop}
+          style={{
+            width: videoWidth,
+            height: videoHeight,
+            // paddingTop: "min(calc(100vh - 9rem), 56.25%)",
+            position: "relative",
+            overflow: "hidden",
+            margin: "auto",
+            borderRadius: "1rem",
+          }}
+        >
           <video
             style={{
               objectFit: "contain",
