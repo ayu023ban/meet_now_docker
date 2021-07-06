@@ -64,7 +64,6 @@ class WebSocketService {
   socketNewMessage(received_data) {
     const parsedData = JSON.parse(received_data);
     const { command, data } = parsedData;
-    console.log(parsedData);
     if (Object.keys(this.callbacks).length === 0) {
       return;
     }

@@ -28,6 +28,7 @@ import { useTheme } from "@material-ui/styles";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import ScreenShareOutlinedIcon from "@material-ui/icons/ScreenShareOutlined";
 import FlipCameraAndroidIcon from "@material-ui/icons/FlipCameraAndroid";
+import MeetingRoomIcon from "@material-ui/icons/MeetingRoom";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -42,7 +43,13 @@ const useStyles = makeStyles((theme) => ({
   right: { marginRight: "1rem" },
 }));
 
-const Controls = ({ switchc, shareScreen, toggleChat }) => {
+const Controls = ({
+  switchc,
+  shareScreen,
+  toggleChat,
+  isJoinedRoom,
+  setIsJoinedRoom,
+}) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const isAudioOn = useSelector((state) => state.roomReducer.userVideo.audioOn);
@@ -86,11 +93,24 @@ const Controls = ({ switchc, shareScreen, toggleChat }) => {
               {isAudioOn ? <MicIcon /> : <MicOffIcon />}
             </IconButton>
           </Tooltip>
-          <Tooltip title="end call">
-            <IconButton color="inherit" onClick={leftRoom}>
-              <CallEndIcon className={classes.orange} />
-            </IconButton>
-          </Tooltip>
+          {isJoinedRoom ? (
+            <Tooltip title="end call">
+              <IconButton color="inherit" onClick={leftRoom}>
+                <CallEndIcon className={classes.orange} />
+              </IconButton>
+            </Tooltip>
+          ) : (
+            <Tooltip title="Join the meeting">
+              <IconButton
+                color="inherit"
+                onClick={() => {
+                  setIsJoinedRoom(true);
+                }}
+              >
+                <MeetingRoomIcon />
+              </IconButton>
+            </Tooltip>
+          )}
           <Tooltip title={isVideoOn ? "video on" : "video off"}>
             <IconButton
               color="inherit"
@@ -105,16 +125,19 @@ const Controls = ({ switchc, shareScreen, toggleChat }) => {
               )}
             </IconButton>
           </Tooltip>
-          <Tooltip title="share screen">
-            <IconButton
-              color="inherit"
-              onClick={() => {
-                shareScreen();
-              }}
-            >
-              <ScreenShareOutlinedIcon />
-            </IconButton>
-          </Tooltip>
+
+          {isJoinedRoom && (
+            <Tooltip title="share screen">
+              <IconButton
+                color="inherit"
+                onClick={() => {
+                  shareScreen();
+                }}
+              >
+                <ScreenShareOutlinedIcon />
+              </IconButton>
+            </Tooltip>
+          )}
         </div>
         {!isMobile && (
           <div className={classes.right}>
@@ -128,7 +151,7 @@ const Controls = ({ switchc, shareScreen, toggleChat }) => {
                 <FlipCameraAndroidIcon />
               </IconButton>
             </Tooltip>
-            {isUserCreator && (
+            {isUserCreator && isJoinedRoom && (
               <Tooltip title="invite users">
                 <IconButton
                   onClick={() => {
@@ -175,14 +198,16 @@ const Controls = ({ switchc, shareScreen, toggleChat }) => {
                 setAnchorEl(null);
               }}
             >
-              <MenuItem
-                onClick={() => {
-                  setAnchorEl(null);
-                  setInviteModalOpen((o) => !o);
-                }}
-              >
-                Invite User
-              </MenuItem>
+              {isUserCreator && isJoinedRoom && (
+                <MenuItem
+                  onClick={() => {
+                    setAnchorEl(null);
+                    setInviteModalOpen((o) => !o);
+                  }}
+                >
+                  Invite User
+                </MenuItem>
+              )}
               <MenuItem
                 onClick={() => {
                   setAnchorEl(null);
@@ -202,7 +227,7 @@ const Controls = ({ switchc, shareScreen, toggleChat }) => {
             </Menu>
           </div>
         )}
-        {isUserCreator && (
+        {isUserCreator && isJoinedRoom && (
           <InviteModal open={inviteModalOpen} setOpen={setInviteModalOpen} />
         )}
         <DetailModal open={detailModalOpen} setOpen={setDetailModalOpen} />

@@ -2,6 +2,7 @@ import {
   CREATE_ROOM,
   GET_ROOM,
   GET_ROOMS,
+  SET_MESSAGES,
   SET_USER_IS_CREATOR,
   TOGGLE_USER_AUDIO,
   TOGGLE_USER_VIDEO,
@@ -16,6 +17,7 @@ const initialState = {
   ...initialPendingState,
   rooms: [],
   currentRoom: {},
+  roomMessages: [],
   userVideo: {
     audioOn: true,
     videoOn: true,
@@ -50,6 +52,8 @@ export default function roomReducer(
       return { ...state, currentRoom: payload };
     case SET_USER_IS_CREATOR:
       return { ...state, isUserCreator: payload };
+    case SET_MESSAGES:
+      return { ...state, roomMessages: payload };
     default:
       return state;
   }

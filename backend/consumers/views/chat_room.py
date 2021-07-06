@@ -70,6 +70,7 @@ class ChatRoomViewSet( viewsets.ModelViewSet):
         if invitee_user == request.user:
             return HttpResponse('you cannot invite yourself', status=status.HTTP_400_BAD_REQUEST)
         room.invited_users.add(invitee_user)
+        room.blocked_users.remove(invitee_user)
         serializer = ChatRoomSerializer(room)
         return Response(serializer.data, status=status.HTTP_200_OK)
     

@@ -5,6 +5,7 @@ import {
   CREATE_ROOM,
   GET_ROOM,
   GET_ROOMS,
+  SET_MESSAGES,
   SET_USER_IS_CREATOR,
   TOGGLE_USER_AUDIO,
   TOGGLE_USER_VIDEO,
@@ -116,5 +117,18 @@ export const getIsUserCreator = (roomId) => {
     apiClient.get(url).then((res) => {
       dispatch(apiDispatch(SET_USER_IS_CREATOR, res.data.isCreator));
     });
+  };
+};
+
+export const setMessages = (data) => {
+  return (dispatch) => {
+    dispatch(apiDispatch(SET_MESSAGES, data));
+  };
+};
+
+export const setNewMessage = (data) => {
+  return (dispatch, getState) => {
+    const messages = getState().roomReducer.roomMessages;
+    dispatch(apiDispatch(SET_MESSAGES, [...messages, data]));
   };
 };

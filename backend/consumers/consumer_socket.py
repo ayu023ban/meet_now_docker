@@ -6,7 +6,8 @@ from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
-from consumers.models import ChatRoom
+from consumers.models import ChatRoom, Message
+from consumers.serializers import MessageSerializer
 from users.serializers import UserSerializer
 from users.models import User
 
@@ -32,7 +33,8 @@ class SocketConsumer(WebsocketConsumer):
         "give join permission status":self.handle_join_permission_status,
         "user kick":self.handle_user_kick,
         "user block":self.handle_user_block,
-        "get media":self.get_media
+        "get media":self.get_media,
+        "get all messages":self.get_all_messages
         }
         
 
@@ -55,7 +57,6 @@ class SocketConsumer(WebsocketConsumer):
             creator = room.creator
 
             if user == creator or room.invited_users.filter(id=user.id).exists():
-                room.users.add(user)
                 self.send_message("get permission",{"usable_id":user.id, "status":"accept"})
             else:
                 query = room.users.all().filter(id=creator.id)
@@ -70,7 +71,6 @@ class SocketConsumer(WebsocketConsumer):
             self.accept()
             self.close(code=4000)
             return
-            pass
 
         
         
@@ -111,7 +111,17 @@ class SocketConsumer(WebsocketConsumer):
 
     def new_message(self,data):
         user = self.scope["user"]
-        self.broadcast("receive new message",{"sender":{"id":user.id,"first_name":user.first_name,"last_name":user.last_name},"message":data})
+        room = self.room
+        message = Message.objects.create(user=user,message=data,room=room)
+        serialized_data = MessageSerializer(message).data
+        final_data = getSerializedData(serialized_data)
+        self.broadcast("receive new message",final_data)
+
+    def get_all_messages(self,data):
+        messages = self.room.messages.all()
+        serialized_data = MessageSerializer(messages,many=True).data
+        final_data = getSerializedData(serialized_data)
+        self.send_message("get all messages",{"messages":serialized_data})
     
     def handle_audio_media(self,data):
         audioMedia[data["userID"]] = data["audioOn"]
@@ -131,7 +141,6 @@ class SocketConsumer(WebsocketConsumer):
         if creator == room.creator:
             if(data["status"]=="accept"):
                 user = User.objects.get(pk=data["userID"])    
-                room.users.add(user)
             self.broadcast("get permission",{"usable_id":data["userID"], "status":data["status"]})
     
     def handle_user_kick(self,data):
@@ -153,12 +162,13 @@ class SocketConsumer(WebsocketConsumer):
 
     def receive(self, text_data):
         data = json.loads(text_data)
+        print(data)
         fun = self.commands.get(data['type'],None)
         if fun is not None:
             fun(data['data'])
 
     def send_message(self,command, content):
-        
+        print({"command":command,"data":content})
         s = json.dumps({"command":command,"data":content})
         self.send(text_data=s)
 

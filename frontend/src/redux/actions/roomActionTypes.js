@@ -4,3 +4,4 @@ export const TOGGLE_USER_AUDIO = "TOGGLE_USER_AUDIO";
 export const TOGGLE_USER_VIDEO = "TOGGLE_USER_VIDEO";
 export const SET_USER_IS_CREATOR = "SET_USER_IS_CREATOR";
 export const GET_ROOM = "GET_ROOM";
+export const SET_MESSAGES = "SET_MESSAGES";

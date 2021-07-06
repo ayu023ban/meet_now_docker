@@ -101,7 +101,6 @@ export const audioMediaListener = (peersRef, setPeers) => (payload) => {
 };
 
 export const getMediaListener = (peersRef, setPeers) => (payload) => {
-  console.log(payload);
   for (let key in peersRef.current) {
     if (payload.audio[key]) {
       peersRef.current[key].user.audioOn = payload.audio[key];

@@ -8,14 +8,15 @@ import WebSocketInstance from "../../helper/WebsocketService";
 import { useSelector } from "react-redux";
 import BlockIcon from "@material-ui/icons/Block";
 import { toast } from "react-toastify";
+import FlashOnIcon from "@material-ui/icons/FlashOn";
+import FlashOffIcon from "@material-ui/icons/FlashOff";
 
 const useStyles = makeStyles((theme) => ({
-  responsive: ({ size, rows }) => ({
+  responsive: () => ({
     float: "left",
-    width: `${100 / size - 2}%`,
-    height: `${100 / rows - 2}%`,
     display: "flex",
     alignItems: "center",
+    transition: "width 0.5s, height 0.5s",
   }),
   videoTop: {
     background: theme.palette.background.paper,
@@ -60,34 +61,53 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Video = React.forwardRef(
-  ({ peer, muted, size, rows, isUserVideo, user, isSharingScreen }, ref) => {
+  (
+    {
+      peer,
+      muted,
+      size,
+      rows,
+      isUserVideo,
+      user,
+      isSharingScreen,
+      pinnedUser,
+      setPinnedUser,
+    },
+    ref
+  ) => {
     const localRef = useRef(null);
     const currentRef = ref || localRef;
-    const classes = useStyles({ size, rows });
+    const userId = user.pk || user.id;
+    const classes = useStyles();
     const [open, setOpen] = React.useState(false);
     const isCreator = useSelector((state) => state.roomReducer.isUserCreator);
     const invitedUsers = useSelector(
       (state) => state.roomReducer.currentRoom.invited_users
     );
-
     const mangoRef = useRef(null);
-    const videoWidth = mangoRef.current
-      ? (mangoRef.current.getBoundingClientRect().width * 9) / 16 <
-        mangoRef.current.getBoundingClientRect().height
-        ? `${0.95 * mangoRef.current.getBoundingClientRect().width}px`
-        : `${
-            (0.95 * mangoRef.current.getBoundingClientRect().height * 16) / 9
-          }px`
-      : "auto";
-    const videoHeight = mangoRef.current
-      ? (mangoRef.current.getBoundingClientRect().width * 9) / 16 >
-        mangoRef.current.getBoundingClientRect().height
-        ? `${0.95 * mangoRef.current.getBoundingClientRect().height}px`
-        : `${
-            (0.95 * mangoRef.current.getBoundingClientRect().width * 9) / 16
-          }px`
-      : "auto";
+    const [videoWidth, setVideoWidth] = React.useState();
+    const [videoHeight, setVideoHeight] = React.useState();
 
+    const resizeObserver = new ResizeObserver((entries) => {
+      let newWidth, newHeight;
+      for (let entry of entries) {
+        if (entry.contentBoxSize) {
+          newWidth =
+            (entry.contentRect.width * 9) / 16 < entry.contentRect.height
+              ? 0.95 * entry.contentRect.width
+              : (0.95 * entry.contentRect.height * 16) / 9;
+          newHeight =
+            (entry.contentRect.width * 9) / 16 > entry.contentRect.height
+              ? 0.95 * entry.contentRect.height
+              : (0.95 * entry.contentRect.width * 9) / 16;
+        }
+      }
+      setVideoWidth(newWidth);
+      setVideoHeight(newHeight);
+    });
+    useEffect(() => {
+      resizeObserver.observe(mangoRef.current);
+    }, []);
     let initials =
       (user.first_name ? user.first_name[0].toUpperCase() : "") +
       (user.last_name ? user.last_name[0].toUpperCase() : "");
@@ -114,8 +134,20 @@ const Video = React.forwardRef(
         WebSocketInstance.sendMessage("user block", { userID: user.id });
       }
     };
+
     return (
-      <div className={classes.responsive} ref={mangoRef}>
+      <div
+        className={classes.responsive}
+        ref={mangoRef}
+        style={{
+          width: `${
+            pinnedUser === userId ? 100 : pinnedUser === -1 ? 100 / size - 2 : 0
+          }%`,
+          height: `${
+            pinnedUser === userId ? 100 : pinnedUser === -1 ? 100 / rows - 2 : 0
+          }%`,
+        }}
+      >
         <div
           className={classes.videoTop}
           style={{
@@ -165,6 +197,26 @@ const Video = React.forwardRef(
                   alignItems: "center",
                 }}
               >
+                <Tooltip
+                  title={pinnedUser === userId ? "remove pin" : "pin the user"}
+                >
+                  <IconButton
+                    className={classes.remove}
+                    onClick={() => {
+                      if (pinnedUser === userId) {
+                        setPinnedUser(-1);
+                      } else {
+                        setPinnedUser(userId);
+                      }
+                    }}
+                  >
+                    {pinnedUser === userId ? (
+                      <FlashOffIcon fontSize="large" />
+                    ) : (
+                      <FlashOnIcon fontSize="large" />
+                    )}
+                  </IconButton>
+                </Tooltip>
                 <Tooltip title="remove user">
                   <IconButton
                     className={classes.remove}

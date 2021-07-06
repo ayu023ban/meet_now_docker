@@ -7,8 +7,9 @@ import WebSocketService from "../../helper/WebsocketService";
 import TextField from "@material-ui/core/TextField";
 import { Send } from "@material-ui/icons";
 import InputAdornment from "@material-ui/core/InputAdornment";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import "./chat.css";
+import { setMessages, setNewMessage } from "../../redux/actions/roomActions";
 const drawerWidth = 360;
 
 const useStyles = makeStyles((theme) => ({
@@ -91,8 +92,7 @@ const MessageList = React.memo((props) => {
         .map((messageItem, idx) => (
           <MessageItem
             key={idx}
-            sender={messageItem.sender}
-            senderAvatar={messageItem.senderAvatar}
+            sender={messageItem.user}
             message={messageItem.message}
           />
         ))}
@@ -101,12 +101,16 @@ const MessageList = React.memo((props) => {
 });
 
 const Chat = ({ open, setOpen }) => {
-  const [messages, setMessages] = useState([]);
+  const messages = useSelector((state) => state.roomReducer.roomMessages);
   const [currMessage, setCurrMessage] = useState("");
   const classes = useStyles();
+  const dispatch = useDispatch();
   useEffect(() => {
     WebSocketService.on("receive new message", (data) => {
-      setMessages((messages) => [...messages, data]);
+      dispatch(setNewMessage(data));
+    });
+    WebSocketService.on("get all messages", (data) => {
+      dispatch(setMessages(data.messages));
     });
   }, []);
   const sendMessage = () => {

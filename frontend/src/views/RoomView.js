@@ -85,7 +85,6 @@ const Room = () => {
   const { roomID } = useParams();
   const [peers, setPeers] = useState({});
   const userVideo = useRef();
-  const socketRef = useRef(WebsocketService);
   const peersRef = useRef({});
   const myID = useSelector((state) => state.userReducer.user.pk);
   const [userStream, setUserStream] = useState();
@@ -103,6 +102,10 @@ const Room = () => {
   const [waitingUsers, setWaitingUsers] = useState([]);
   const dispatch = useDispatch();
   const [isSharingScreen, setIsSharingScreen] = useState(false);
+  const [pinnedUser, setPinnedUser] = useState(-1);
+
+  const [isJoinedRoom, setIsJoinedRoom] = useState(false);
+
   const setCameraStream = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: true,
@@ -116,7 +119,7 @@ const Room = () => {
 
   const socketConnect = async () => {
     await setCameraStream();
-    socketRef.current.sendMessage("join room", roomID);
+    WebsocketService.sendMessage("get all messages", "");
   };
 
   useEffect(() => {
@@ -126,16 +129,18 @@ const Room = () => {
   }, []);
 
   useEffect(() => {
-    socketFunctions(
-      peersRef,
-      myID,
-      userStream,
-      setPeers,
-      isUserAudioOn,
-      isUserVideoOn,
-      setWaitingUsers
-    );
-  }, [userStream, isUserAudioOn, isUserVideoOn, myID]);
+    if (isJoinedRoom) {
+      socketFunctions(
+        peersRef,
+        myID,
+        userStream,
+        setPeers,
+        isUserAudioOn,
+        isUserVideoOn,
+        setWaitingUsers
+      );
+    }
+  }, [isJoinedRoom, userStream, isUserAudioOn, isUserVideoOn, myID]);
 
   useEffect(() => {
     let userStreamRef = userStream;
@@ -154,8 +159,8 @@ const Room = () => {
   useEffect(() => {
     if (userStream) {
       userStream.getAudioTracks()[0].enabled = isUserAudioOn;
-      if (socketRef.current.state() === 1) {
-        socketRef.current.sendMessage("audioMedia", {
+      if (WebsocketService.state() === 1) {
+        WebsocketService.sendMessage("audioMedia", {
           userID: myID,
           audioOn: isUserAudioOn,
         });
@@ -164,10 +169,16 @@ const Room = () => {
   }, [userStream, isUserAudioOn, myID]);
 
   useEffect(() => {
+    if (isJoinedRoom) {
+      WebsocketService.sendMessage("join room", roomID);
+    }
+  }, [isJoinedRoom]);
+
+  useEffect(() => {
     if (userStream) {
       userStream.getVideoTracks()[0].enabled = isUserVideoOn;
-      if (socketRef.current.state() === 1) {
-        socketRef.current.sendMessage("videoMedia", {
+      if (WebsocketService.state() === 1) {
+        WebsocketService.sendMessage("videoMedia", {
           userID: myID,
           videoOn: isUserVideoOn,
         });
@@ -200,7 +211,9 @@ const Room = () => {
           size={sizeMap[1]}
           rows={sizeMap["rows"]}
           isUserVideo
-          isSharingScreen
+          isSharingScreen={isSharingScreen}
+          pinnedUser={pinnedUser}
+          setPinnedUser={setPinnedUser}
         />
         {Object.values(peers).map((item, index) => {
           return (
@@ -210,6 +223,8 @@ const Room = () => {
               user={item.user}
               size={sizeMap[index + 2]}
               rows={sizeMap["rows"]}
+              pinnedUser={pinnedUser}
+              setPinnedUser={setPinnedUser}
             />
           );
         })}
@@ -239,6 +254,8 @@ const Room = () => {
         toggleChat={() => {
           setChatOpen((open) => !open);
         }}
+        isJoinedRoom={isJoinedRoom}
+        setIsJoinedRoom={setIsJoinedRoom}
       />
       <Chat open={chatOpen} setOpen={setChatOpen} />
     </div>

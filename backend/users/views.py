@@ -17,7 +17,6 @@ class FacebookLogin(SocialLoginView):
     adapter_class = FacebookOAuth2Adapter
     client_class = OAuth2Client
     serializer_class = SocialLoginSerializer
-    # callback_url = "http://localhost:7000/"
     def get_serializer(self, *args, **kwargs):
         serializer_class = self.get_serializer_class()
         kwargs['context'] = self.get_serializer_context()
@@ -27,7 +26,6 @@ class GoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
     client_class = OAuth2Client
     serializer_class = SocialLoginSerializer
-    # callback_url = "http://localhost:7000/"
 
     def get_serializer(self, *args, **kwargs):
         serializer_class = self.get_serializer_class()
