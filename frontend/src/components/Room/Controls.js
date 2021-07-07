@@ -49,6 +49,7 @@ const Controls = ({
   toggleChat,
   isJoinedRoom,
   setIsJoinedRoom,
+  leaveMeet,
 }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
@@ -95,7 +96,7 @@ const Controls = ({
           </Tooltip>
           {isJoinedRoom ? (
             <Tooltip title="end call">
-              <IconButton color="inherit" onClick={leftRoom}>
+              <IconButton color="inherit" onClick={leaveMeet}>
                 <CallEndIcon className={classes.orange} />
               </IconButton>
             </Tooltip>
@@ -198,6 +199,13 @@ const Controls = ({
                 setAnchorEl(null);
               }}
             >
+              <MenuItem
+                onClick={() => {
+                  switchc();
+                }}
+              >
+                Switch Camera
+              </MenuItem>
               {isUserCreator && isJoinedRoom && (
                 <MenuItem
                   onClick={() => {

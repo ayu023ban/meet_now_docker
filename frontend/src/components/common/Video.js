@@ -43,6 +43,7 @@ const useStyles = makeStyles((theme) => ({
   },
   hoverDiv: {
     position: "absolute",
+    zIndex: 3,
     top: "0",
     left: "0",
     width: "100%",
@@ -122,12 +123,14 @@ const Video = React.forwardRef(
         });
       }
     }, []);
-    const removeUser = () => {
-      if (!isCreator || isUserVideo) return;
+    const removeUser = (e) => {
+      e.stopPropagation();
+      if (!isCreator || isUserVideo || !open) return;
       WebSocketInstance.sendMessage("user kick", { userID: user.id });
     };
-    const blockUser = () => {
-      if (!isCreator || isUserVideo) return;
+    const blockUser = (e) => {
+      e.stopPropagation();
+      if (!isCreator || isUserVideo || !open) return;
       if (invitedUsers.some((el) => el.id === user.id)) {
         toast.error("user is invited. first remove the invitation");
       } else {
@@ -178,76 +181,96 @@ const Video = React.forwardRef(
             onMouseEnter={() => {
               setOpen(true);
             }}
+            onTouchEnd={() => {
+              setOpen((o) => !o);
+            }}
           />
-          <Fade in={open}>
-            <div
-              className={classes.hoverDiv}
-              onMouseLeave={() => {
-                setOpen(false);
-              }}
-            >
+          {open && (
+            <Fade in={open}>
               <div
-                style={{
-                  opacity: 0.6,
-                  background: "black",
-                  width: "100%",
-                  height: "100%",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
+                className={classes.hoverDiv}
+                onMouseLeave={() => {
+                  setOpen(false);
+                }}
+                onTouchEnd={() => {
+                  setOpen((o) => !o);
                 }}
               >
-                <Tooltip
-                  title={pinnedUser === userId ? "remove pin" : "pin the user"}
+                <div
+                  style={{
+                    opacity: 0.6,
+                    background: "black",
+                    width: "100%",
+                    height: "100%",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
                 >
-                  <IconButton
-                    className={classes.remove}
-                    onClick={() => {
-                      if (pinnedUser === userId) {
-                        setPinnedUser(-1);
-                      } else {
-                        setPinnedUser(userId);
-                      }
-                    }}
+                  <Tooltip
+                    title={
+                      pinnedUser === userId ? "remove pin" : "pin the user"
+                    }
                   >
-                    {pinnedUser === userId ? (
-                      <FlashOffIcon fontSize="large" />
-                    ) : (
-                      <FlashOnIcon fontSize="large" />
-                    )}
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="remove user">
-                  <IconButton
-                    className={classes.remove}
-                    onClick={removeUser}
-                    disabled={!isCreator || isUserVideo}
-                  >
-                    <RemoveCircleOutlineIcon fontSize="large" />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="Block user">
-                  <IconButton
-                    className={classes.remove}
-                    onClick={blockUser}
-                    disabled={!isCreator || isUserVideo}
-                  >
-                    <BlockIcon fontSize="large" />
-                  </IconButton>
-                </Tooltip>
-                <Typography variant="p" className={classes.name}>
-                  {fullName}
-                </Typography>
+                    <IconButton
+                      className={classes.remove}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (!open) return;
+                        if (pinnedUser === userId) {
+                          setPinnedUser(-1);
+                        } else {
+                          setPinnedUser(userId);
+                        }
+                      }}
+                    >
+                      {pinnedUser === userId ? (
+                        <FlashOffIcon fontSize="large" />
+                      ) : (
+                        <FlashOnIcon fontSize="large" />
+                      )}
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="remove user">
+                    <IconButton
+                      className={classes.remove}
+                      onClick={removeUser}
+                      disabled={!isCreator || isUserVideo}
+                    >
+                      <RemoveCircleOutlineIcon fontSize="large" />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Block user">
+                    <IconButton
+                      className={classes.remove}
+                      onClick={blockUser}
+                      disabled={!isCreator || isUserVideo}
+                    >
+                      <BlockIcon fontSize="large" />
+                    </IconButton>
+                  </Tooltip>
+                  <Typography variant="p" className={classes.name}>
+                    {fullName}
+                  </Typography>
+                </div>
               </div>
-            </div>
-          </Fade>
+            </Fade>
+          )}
           {!user.audioOn && (
             <IconButton className={classes.micOff}>
               <MicOffIcon />
             </IconButton>
           )}
           {!user.videoOn && (
-            <div className={classes.videoOff}>
+            <div
+              className={classes.videoOff}
+              onMouseEnter={() => {
+                setOpen(true);
+              }}
+              onTouchEnd={() => {
+                setOpen((o) => !o);
+              }}
+            >
               <Avatar className={classes.avatar}>{initials}</Avatar>
             </div>
           )}

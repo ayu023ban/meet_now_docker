@@ -34,7 +34,8 @@ class SocketConsumer(WebsocketConsumer):
         "user kick":self.handle_user_kick,
         "user block":self.handle_user_block,
         "get media":self.get_media,
-        "get all messages":self.get_all_messages
+        "get all messages":self.get_all_messages,
+        "user left":self.user_left
         }
         
 
@@ -159,16 +160,22 @@ class SocketConsumer(WebsocketConsumer):
                 self.broadcast("user blocked",{"usable_id":data["userID"]})
             except User.DoesNotExist:
                 pass
+    
+    def user_left(self,data):
+        user = self.scope["user"]
+        if self.room is not None:
+            self.room.users.remove(user)
+        serialized_data = UserSerializer(user).data
+        final_data = getSerializedData(serialized_data)
+        self.broadcast("user left",{"user":final_data})
 
     def receive(self, text_data):
         data = json.loads(text_data)
-        print(data)
         fun = self.commands.get(data['type'],None)
         if fun is not None:
             fun(data['data'])
 
     def send_message(self,command, content):
-        print({"command":command,"data":content})
         s = json.dumps({"command":command,"data":content})
         self.send(text_data=s)
 

@@ -18,7 +18,7 @@ import {
   getMediaListener,
 } from "../helper/socketListeners";
 import JoinModal from "../components/Room/JoinModal";
-import { shareScreen, switchCamera } from "../helper/unusedFunctions";
+import { shareScreen, switchCamera } from "../helper/streamFunctions";
 import { getIsUserCreator, getRoom } from "../redux/actions/roomActions";
 
 let videoConstraints = {
@@ -79,6 +79,13 @@ const socketFunctions = (
     getPermissionRequestListener(myID, setWaitingUsers)
   );
   WebsocketService.on("get media", getMediaListener(peersRef, setPeers));
+};
+
+const resetSocketFunctions = () => {
+  WebsocketService.del("all users");
+  WebsocketService.del("user joined");
+  WebsocketService.del("receiving returned signal");
+  WebsocketService.del("user left");
 };
 
 const Room = () => {
@@ -171,6 +178,14 @@ const Room = () => {
   useEffect(() => {
     if (isJoinedRoom) {
       WebsocketService.sendMessage("join room", roomID);
+    } else {
+      resetSocketFunctions();
+      for (let key in peersRef.current) {
+        peersRef.current[key].peer.destroy();
+      }
+      WebsocketService.sendMessage("user left","")
+      peersRef.current = {};
+      setPeers({});
     }
   }, [isJoinedRoom]);
 
@@ -189,6 +204,10 @@ const Room = () => {
   useEffect(() => {
     sizeMap = split(Object.keys(peers).length + 1);
   }, [peers]);
+
+  const leaveMeet = () => {
+    setIsJoinedRoom(false);
+  };
 
   return (
     <div className={classes.container}>
@@ -256,6 +275,7 @@ const Room = () => {
         }}
         isJoinedRoom={isJoinedRoom}
         setIsJoinedRoom={setIsJoinedRoom}
+        leaveMeet={leaveMeet}
       />
       <Chat open={chatOpen} setOpen={setChatOpen} />
     </div>

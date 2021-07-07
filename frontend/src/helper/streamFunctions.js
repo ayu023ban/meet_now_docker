@@ -1,14 +1,14 @@
-export const updateStream = (peersRef, setPeers, userStream) => (stream) => {
+export const updateStream = (peersRef, setPeers, userStream) => (track) => {
   for (let key in peersRef.current) {
     peersRef.current[key].peer.replaceTrack(
       userStream.getVideoTracks()[0],
-      stream.getVideoTracks()[0],
+      track,
       userStream
     );
   }
   setPeers({ ...peersRef.current });
   userStream.removeTrack(userStream.getVideoTracks()[0]);
-  userStream.addTrack(stream.getVideoTracks()[0]);
+  userStream.addTrack(track);
 };
 
 export const switchCamera =
@@ -33,7 +33,7 @@ export const switchCamera =
       video: videoConstraints,
       audio: true,
     });
-    updateStream(peersRef, setPeers, userStream)(stream);
+    updateStream(peersRef, setPeers, userStream)(stream.getVideoTracks()[0]);
   };
 
 export const shareScreen = async (
@@ -46,14 +46,17 @@ export const shareScreen = async (
   const screenStream = await navigator.mediaDevices.getDisplayMedia({
     cursor: true,
   });
-  updateStream(peersRef, setPeers, userStream)(screenStream);
+  let currTrack = userStream.getVideoTracks()[0];
+  let screenTrack = screenStream.getVideoTracks()[0];
+  updateStream(peersRef, setPeers, userStream)(screenTrack);
   setIsSharingScreen(true);
-  screenStream.getTracks()[0].onended = async () => {
+
+  screenTrack.onended = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: videoConstraints,
       audio: true,
     });
-    updateStream(peersRef, setPeers, userStream)(stream);
+    updateStream(peersRef, setPeers, userStream)(currTrack);
     setIsSharingScreen(false);
   };
 };

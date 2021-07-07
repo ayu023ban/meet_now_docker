@@ -60,10 +60,16 @@ class WebSocketService {
   on(command, func) {
     this.callbacks[command] = func;
   }
+  del(command) {
+    if (this.callbacks[command]) {
+      delete this.callbacks[command];
+    }
+  }
 
   socketNewMessage(received_data) {
     const parsedData = JSON.parse(received_data);
     const { command, data } = parsedData;
+    console.log(parsedData);
     if (Object.keys(this.callbacks).length === 0) {
       return;
     }
@@ -74,6 +80,7 @@ class WebSocketService {
 
   sendMessage(type, data) {
     try {
+      console.log(type, data);
       this.waitForConnection(
         function () {
           this.socketRef.send(JSON.stringify({ type, data }));

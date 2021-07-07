@@ -13,6 +13,20 @@ import { LogOut } from "../../redux/actions/userActions";
 import Brightness5Icon from "@material-ui/icons/Brightness5";
 import themes from "../../config/themes";
 import { changeTheme } from "../../redux/actions/themeActions";
+import { Link } from "react-router-dom";
+import solarizedDark from "../../assets/images/solarised_dark.png";
+import solarizedLight from "../../assets/images/solarised_light.png";
+import palpatine from "../../assets/images/palpatine.png";
+import light from "../../assets/images/light.png";
+import dark from "../../assets/images/dark.png";
+
+const themeLogoMap = {
+  solarizedDark,
+  solarizedLight,
+  light,
+  dark,
+  palpatine,
+};
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -20,6 +34,11 @@ const useStyles = makeStyles((theme) => ({
   },
   title: {
     display: "block",
+    textDecoration: "none",
+    color: theme.palette.text.primary,
+    "&:hover": {
+      textDecoration: "none",
+    },
   },
   sectionDesktop: {
     display: "flex",
@@ -57,9 +76,20 @@ export default function NavBar() {
     <div className={classes.grow}>
       <AppBar position="static">
         <Toolbar>
-          <Typography className={classes.title} variant="h6" noWrap>
-            Microsoft Teams
-          </Typography>
+          <Link to="/">
+            <Typography className={classes.title} variant="h6" noWrap>
+              <img
+                src={themeLogoMap[currentTheme]}
+                alt="logo"
+                style={{
+                  marginRight: "1rem",
+                  width: "30px",
+                  height: "30px",
+                }}
+              />
+              Meet Now
+            </Typography>
+          </Link>
           <div className={classes.grow} />
 
           <IconButton

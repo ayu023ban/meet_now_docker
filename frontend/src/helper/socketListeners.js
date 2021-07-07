@@ -40,7 +40,8 @@ export const user_joined_listener =
     }
   };
 
-export const receive_returned_signal = (myID, peersRef, isUserAudioOn, isUserVideoOn) => (payload) => {
+export const receive_returned_signal =
+  (myID, peersRef, isUserAudioOn, isUserVideoOn) => (payload) => {
     if (payload.usable_id === myID) {
       const { peer } = peersRef.current[payload.id];
       peer.signal(payload.signal);
@@ -67,9 +68,6 @@ export const user_left_listener = (myID, peersRef, setPeers) => (payload) => {
     const { [payload.user.id]: remove, ...rest } = peers;
     return rest;
   });
-  if (payload.user.id !== myID) {
-    toast.info(`${getFullName(user.first_name, user.last_name)} left`);
-  }
 };
 
 export const videoMediaListener = (peersRef, setPeers) => (payload) => {
