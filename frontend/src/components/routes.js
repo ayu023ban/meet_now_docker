@@ -1,9 +1,9 @@
 import React from "react";
 import DefaultLayout from "./layouts/DefaultLayout";
+import Home from "../views/HomeView";
+import LoginView from "../views/LoginView";
+import WaitingRoomView from "../views/WaitingRoomView";
 
-const Home = React.lazy(() => import("../views/HomeView.js"));
-const LoginView = React.lazy(() => import("../views/LoginView.js"));
-const View = React.lazy(() => import("../views/View.js"));
 export const protectedRoutes = [
   {
     path: "/",
@@ -16,7 +16,7 @@ export const protectedRoutes = [
     path: "/room/:roomID",
     exact: true,
     layout: DefaultLayout,
-    component: () => <View />,
+    component: () => <WaitingRoomView />,
     strictlyPublic: false,
   },
 ];

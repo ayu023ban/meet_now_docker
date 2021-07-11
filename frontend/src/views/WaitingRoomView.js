@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const View = () => {
+const WaitingRoomView = () => {
   const { roomID } = useParams();
   const history = useHistory();
   const classes = useStyles();
@@ -117,4 +117,4 @@ const View = () => {
   );
 };
 
-export default View;
+export default WaitingRoomView;
