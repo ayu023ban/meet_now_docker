@@ -11,12 +11,6 @@ const themes = {
     secondary: { main: "#002b36", contrastText: "#eee8d5" },
     background: { default: "#eee8d5", paper: "#fff7dd" },
   },
-  palpatine: {
-    type: "dark",
-    primary: { main: "#1a1a1a", contrastText: "#ffffff" },
-    secondary: { main: "#e04035", contrastText: "#ffffff" },
-    background: { default: "#101010", paper: "#1b1b1b" },
-  },
   light: {
     type: "light",
     primary: { main: "#f0f2f5", contrastText: "#000000" },

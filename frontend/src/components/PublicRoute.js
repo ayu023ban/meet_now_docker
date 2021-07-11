@@ -1,6 +1,6 @@
-import React, { Suspense } from 'react';
-import { useSelector } from 'react-redux';
-import { Route, Redirect } from 'react-router-dom';
+import React, { Suspense } from "react";
+import { useSelector } from "react-redux";
+import { Route, Redirect, useLocation } from "react-router-dom";
 
 const NewComponent = ({ component: Component, ...restProps }) => {
   return <Component {...restProps} />;
@@ -12,13 +12,16 @@ const PublicRoute = ({
   strictlyPublic = false,
   ...rest
 }) => {
-  const isLoggedIn = useSelector(state => state.userReducer.isLoggedIn);
-
+  const isLoggedIn = useSelector((state) => state.userReducer.isLoggedIn);
+  const location = useLocation();
+  let url = location.search;
+  url = url.includes("?next=") ? url.split("?next=") : "";
+  url = url.length > 1 ? url[1] : "";
   return (
     <Route
       path={rest.path}
       exact={rest.exact}
-      component={props => {
+      component={(props) => {
         return !strictlyPublic || isLoggedIn !== true ? (
           <Layout
             {...props}
@@ -32,7 +35,7 @@ const PublicRoute = ({
             </Suspense>
           </Layout>
         ) : (
-          <Redirect to="/" />
+          <Redirect to={url || "/"} />
         );
       }}
     />

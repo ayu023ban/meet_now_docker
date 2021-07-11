@@ -6,7 +6,7 @@ import React, {
   useEffect,
 } from "react";
 import { useSelector } from "react-redux";
-import { Route, Redirect } from "react-router-dom";
+import { Route, Redirect, useHistory } from "react-router-dom";
 import Loader from "../components/common/Loader";
 
 const NewComponent = ({ component: Component, ...restProps }) => {
@@ -17,6 +17,7 @@ const PrivateRoute = ({ layout: Layout, component: Component, ...rest }) => {
   const [authenticationPending, setAuthenticationPending] = useState(true);
   const firstUpdate = useRef(true);
   const isLoggedIn = useSelector((state) => state.userReducer.isLoggedIn);
+  const history = useHistory();
   const getUserDataPending = useSelector(
     (state) => state.userReducer.getUserPending
   );
@@ -57,7 +58,9 @@ const PrivateRoute = ({ layout: Layout, component: Component, ...rest }) => {
             </Suspense>
           </Layout>
         ) : (
-          <Redirect to="/login" />
+          <Redirect
+            to={`/login?next=${history.location.pathname}${history.location.search}`}
+          />
         );
       }}
     />

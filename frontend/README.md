@@ -1,70 +1,57 @@
-# Getting Started with Create React App
+<a><img height="40" src="./src/assets/images/solarised_light.png" align="right"></a>
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Meet Now 👋
 
-## Available Scripts
+⭐️ Star it on GitHub — it motivates me a lot!
 
-In the project directory, you can run:
+[Meet Now](https://meetnow.tech/) is a Video conferencing app based on peer to peer connection
+<br />
+<br />
+<br />
 
-### `yarn start`
+### 🏠 [https://github.com/ayu023ban/teams-docker#readme](https://github.com/ayu023ban/teams-docker#readme)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### 🌐 [https://meetnow.tech/](https://meetnow.tech/)
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+<br />
+<br />
 
-### `yarn test`
+## features
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+    - Room creations
+    - individual chats for each room
+    - invite user to room
+    - kick user out of the room
+    - block user permanently
+    - permission to join the room
+    - enable/disable microphone
+    - enable/disable camera
+    - switch camera in case of multiple cameras
+    - share screen
+    - user pin
+    - waiting room to enable/disable camera and microphone before joining the room
+    - Chat function inside the waiting room so that you don't have to join the room in case you only want to do chat conversations
+    - Cool Themes
 
-### `yarn build`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## SnapShots
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- Login [![Login page](./src/assets/images/login.png)](https://meetnow.tech/login/)
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-### `yarn eject`
+- Home[![Home page](./src/assets/images/home.png)](https://meetnow.tech/login/)
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+- Waiting Room[![Waiting Room Page](./src/assets/images/home.png)](https://meetnow.tech/login/)
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+---
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+## Author
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+👤 **ayush bansal**
 
-## Learn More
+- Website: http://ayu023ban.github.io
+- Github: [@ayu023ban](https://github.com/ayu023ban)
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Show your support
 
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `yarn build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Give a ⭐️ if this project helped you!

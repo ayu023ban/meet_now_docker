@@ -7,6 +7,7 @@ import {
   Tooltip,
   Menu,
   MenuItem,
+  Button,
 } from "@material-ui/core";
 import React, { useState } from "react";
 import { red } from "@material-ui/core/colors";
@@ -28,7 +29,6 @@ import { useTheme } from "@material-ui/styles";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import ScreenShareOutlinedIcon from "@material-ui/icons/ScreenShareOutlined";
 import FlipCameraAndroidIcon from "@material-ui/icons/FlipCameraAndroid";
-import MeetingRoomIcon from "@material-ui/icons/MeetingRoom";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -41,6 +41,14 @@ const useStyles = makeStyles((theme) => ({
     color: red[500],
   },
   right: { marginRight: "1rem" },
+  join: {
+    color: theme.palette.background.default,
+    background: theme.palette.text.primary,
+    "&:hover": {
+      color: theme.palette.text.primary,
+      background: theme.palette.background.default,
+    },
+  },
 }));
 
 const Controls = ({
@@ -57,14 +65,10 @@ const Controls = ({
   const isVideoOn = useSelector((state) => state.roomReducer.userVideo.videoOn);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
-  const history = useHistory();
   const roomName = useSelector(
     (state) => state.roomReducer.currentRoom.room_name
   );
   const isUserCreator = useSelector((state) => state.roomReducer.isUserCreator);
-  const leftRoom = () => {
-    history.replace("/");
-  };
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -102,14 +106,14 @@ const Controls = ({
             </Tooltip>
           ) : (
             <Tooltip title="Join the meeting">
-              <IconButton
-                color="inherit"
+              <Button
                 onClick={() => {
                   setIsJoinedRoom(true);
                 }}
+                className={classes.join}
               >
-                <MeetingRoomIcon />
-              </IconButton>
+                Join Room
+              </Button>
             </Tooltip>
           )}
           <Tooltip title={isVideoOn ? "video on" : "video off"}>

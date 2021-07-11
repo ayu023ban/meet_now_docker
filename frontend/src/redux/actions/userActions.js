@@ -64,18 +64,6 @@ export const GoogleLoginFtn = (data) => {
       })
       .catch((error) => {
         dispatch(userErrorDispatch(error));
-        // toast.error(
-        //   `User is already signed In with this email, try to login with either facebook or fill the form`,
-        //   {
-        //     // position: "top-center",
-        //     autoClose: 5000,
-        //     hideProgressBar: true,
-        //     closeOnClick: true,
-        //     pauseOnHover: true,
-        //     draggable: true,
-        //     progress: undefined,
-        //   }
-        // );
       });
   };
 };
@@ -88,12 +76,8 @@ export const FacebookLoginFtn = (data) => {
       .then((res) => {
         dispatch(apiDispatch(SET_TOKEN, res.data.key));
         dispatch(apiDispatch(LOGGEDINORNOT, true));
-        let data = {
-          bio: "",
-          phone_number: "",
-        };
-        dispatch(getUser(data));
-        toast.success("Welcome back, Logged In Successfully", {
+        dispatch(getUser());
+        toast.success("Logged In Successfully", {
           position: "top-right",
           autoClose: 5000,
           hideProgressBar: true,
@@ -106,18 +90,6 @@ export const FacebookLoginFtn = (data) => {
       })
       .catch((error) => {
         dispatch(userErrorDispatch(error));
-        toast.error(
-          `User is already signed In with this email, try to login with either google or fill the form`,
-          {
-            position: "top-center",
-            autoClose: 5000,
-            hideProgressBar: true,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-          }
-        );
       });
   };
 };
