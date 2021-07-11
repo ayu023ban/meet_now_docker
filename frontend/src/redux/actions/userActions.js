@@ -63,6 +63,17 @@ export const GoogleLoginFtn = (data) => {
         Cookies.set("token", res.data.key, { expires: 7 });
       })
       .catch((error) => {
+        if (error.response.status === 400) {
+          if (
+            error.response.data &&
+            error.response.data.non_field_errors &&
+            error.response.data.non_field_errors.length > 0 &&
+            error.response.data.non_field_errors[0] ===
+              "User is already registered with this e-mail address."
+          ) {
+            toast.error("user already registered with facebook.");
+          }
+        }
         dispatch(userErrorDispatch(error));
       });
   };
@@ -89,6 +100,17 @@ export const FacebookLoginFtn = (data) => {
         Cookies.set("token", res.data.key, { expires: 7 });
       })
       .catch((error) => {
+        if (error.response.status === 400) {
+          if (
+            error.response.data &&
+            error.response.data.non_field_errors &&
+            error.response.data.non_field_errors.length > 0 &&
+            error.response.data.non_field_errors[0] ===
+              "User is already registered with this e-mail address."
+          ) {
+            toast.error("user already registered with google.");
+          }
+        }
         dispatch(userErrorDispatch(error));
       });
   };
